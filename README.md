@@ -37,7 +37,7 @@ AI Assistant is a **fully local** alternative to cloud-based assistants. Your da
 4. **Phase 4**: Polishing and Ecosystem
 
 
-## 🏗️ Архитектура
+## 🏗️ Architecture
 
 AI_PC_Assistant/
 ├── src-tauri/ # Rust-core (Tauri)
