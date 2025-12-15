@@ -1,11 +1,8 @@
-use std::time::{SystemTime, Duration};
-use std::collections::hashmap::Entry;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use serde_json::Value;
 use std::hash::Hash;
 use uuid::Uuid;
-use std::fmt;
 
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -215,7 +212,6 @@ impl PermissionChecker {
         PermissionChecker {
             plugin_policies: HashMap::new(),
             system_constraints: SystemConstraints::new(security_level),
-            check_context: CheckContext::current(),
             logger: Logger,
         }
     }
@@ -259,6 +255,7 @@ impl PermissionChecker {
             Some(p) => p,
             None => {
                 self.logger.log(&format!("Plugin {:?} not found", plugin_id));
+                return CheckResult::Denied("Plugin not found".to_string());
             }
         };
 
@@ -282,7 +279,7 @@ impl PermissionChecker {
             }
         }
 
-        CheckResult::Granted;
+        CheckResult::Granted
     }
 
     fn passes_system_constraints(&self, permission: &Permission) -> bool {
@@ -342,7 +339,7 @@ impl PermissionChecker {
         PermissionStatus::NotDecided
     }
 
-    pub fn update_user_decision(&mut self, plugin_id: &Uuid, permission: &Permission, decision: bool) {
+    pub fn update_user_decision(&mut self, plugin_id: &Uuid, permission: &Permission, decision: bool) -> Result<(), String> {
         let policy = match self.plugin_policies.get_mut(plugin_id) {
             Some(p) => p,
             None => return Err(format!("Plugin {:?} not found", plugin_id)),
@@ -353,9 +350,9 @@ impl PermissionChecker {
         }
 
         let status = if decision {
-            self.plugin_policies.get_mut(plugin_id)?.update_status(permission.clone(), PermissionStatus::Granted)
+            PermissionStatus::Granted
         } else {
-            self.plugin_policies.get_mut(plugin_id)?.update_status(permission.clone(), PermissionStatus::Denied)
+            PermissionStatus::Denied
         };
 
         policy.update_status(permission.clone(), status);
@@ -371,7 +368,7 @@ impl PermissionChecker {
     pub fn get_pending_requests(&self) -> Vec<(Uuid, Permission)> {
         let mut results = Vec::new();
 
-        for (plugin_id, policy) in self.plugin_policies {
+        for (plugin_id, policy) in &self.plugin_policies {
             for (permission, status) in policy.permissions {
                 if PermissionStatus::NotDecided == status {
                     results.push((plugin_id.clone(), permission.clone()))
