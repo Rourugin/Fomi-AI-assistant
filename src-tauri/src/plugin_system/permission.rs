@@ -175,7 +175,7 @@ impl SystemConstraints {
     }
 
     fn add_denied_path(&mut self, path: String) {
-        self.denied_paths(path);
+        self.denied_paths.push(path);
     }
 }
 
@@ -328,7 +328,7 @@ impl PermissionChecker {
                         Ok(())
                     }
                     SystemControl::ClipboardAccess if context.is_screen_locked => {
-                        Err("Cannot access clipboard when screen is locked".to_string());
+                        return Err("Cannot access clipboard when screen is locked".to_string());
                     }
                     _=>Ok(())
                 }
@@ -339,7 +339,7 @@ impl PermissionChecker {
     }
 
     pub(crate) fn request_user_approval(&self, plugin_id: &Uuid, permission: &Permission) -> PermissionStatus {
-        PermissionStatus::NotDecided;
+        PermissionStatus::NotDecided
     }
 
     pub fn update_user_decision(&mut self, plugin_id: &Uuid, permission: &Permission, decision: bool) {
@@ -353,9 +353,9 @@ impl PermissionChecker {
         }
 
         let status = if decision {
-            self.plugin_policies[plugin_id].update_status(permission.clone(), PermissionStatus::Granted)
+            self.plugin_policies.get_mut(plugin_id)?.update_status(permission.clone(), PermissionStatus::Granted)
         } else {
-            self.plugin_policies[plugin_id].update_status(permission.clone(), PermissionStatus::Denied)
+            self.plugin_policies.get_mut(plugin_id)?.update_status(permission.clone(), PermissionStatus::Denied)
         };
 
         policy.update_status(permission.clone(), status);

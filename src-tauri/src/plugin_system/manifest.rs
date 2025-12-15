@@ -1,8 +1,9 @@
+use crate::plugin_system::permissions::Permission; 
 use std::path::PathBuf;
 use uuid::Uuid;
 
 
-struct PluginManifest {
+pub struct PluginManifest {
     id: Uuid,
     name: String,
     version: String,
@@ -15,7 +16,7 @@ struct PluginManifest {
 
 
 impl PluginManifest {
-    pub fn new(name: String) -> &self {
+    pub fn new(name: String) -> Self {
         PluginManifest {
             id: Uuid::new_v4(),
             name,
@@ -36,8 +37,8 @@ impl PluginManifest {
         self.description = description
     }
 
-    pub fn set_entry_point(&mut self, path: PathBuf) {
-        if path.exist() {
+    pub fn set_entry_point(&mut self, path: PathBuf) -> Result<(), String> {
+        if path.exists() {
             self.entry_point = path;
             Ok(())
         } else {
@@ -46,7 +47,7 @@ impl PluginManifest {
     }
 
     pub fn set_api_version(&mut self, api_version: String) {
-        &self.api_version = api_version
+        self.api_version = api_version
     }
 
     pub fn id(&self) -> &Uuid {
@@ -69,7 +70,7 @@ impl PluginManifest {
         &self.description
     }
 
-    pub fn entry_point(&self) -> PathBuf {
+    pub fn entry_point(&self) -> &PathBuf {
         &self.entry_point
     }
 
@@ -86,7 +87,7 @@ impl PluginManifest {
             self.permissions.push(permission);
             Ok(())
         } else {
-            Err("Permission already exist".to_string())
+            Err("Permission already exists".to_string())
         }
     }
 
@@ -105,11 +106,11 @@ impl PluginManifest {
 
     pub fn validate(&self) -> Result<(), String> {
         if self.name.trim().is_empty() {
-            return Err("Plugin name cannot empty".to_string())
+            return Err("Plugin name cannot be empty".to_string())
         }
 
         if self.version.trim().is_empty() {
-            return Err("Plugin version cannot empty".to_string())
+            return Err("Plugin version cannot be empty".to_string())
         }
 
         if self.api_version.trim().is_empty() {
@@ -125,6 +126,7 @@ impl PluginManifest {
 
     pub fn display_info(&self) -> String {
         format!(
+            "{} v{} (ID: {})\nAuthor: {}\nDescription: {}\nPermissions: {}",
             self.name,
             self.version,
             self.id,

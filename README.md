@@ -1,4 +1,4 @@
-# AI Assistant 🤖
+# Fomi - an AI Assistant 🤖
 
 > ⚠️ **The project is in the early stages of development** - this is still an architectural framework, not a finished product.
 
@@ -8,7 +8,7 @@
 
 ## 🎯 Project philosophy
 
-AI Assistant is a **fully local** alternative to cloud-based assistants. Your data stays on your device, and running on low-end hardware is our priority.
+Fomi Assistant is a **fully local** alternative to cloud-based assistants. Your data stays on your device, and running on low-end hardware is our priority.
 
 **Key principles:**
 - 🔒 **Privacy** — no cloud APIs, everything is local.
@@ -39,7 +39,7 @@ AI Assistant is a **fully local** alternative to cloud-based assistants. Your da
 
 ## 🏗️ Architecture
 
-AI_PC_Assistant/
+Fomi-AI-Assistant/
 ├── src-tauri/ # Rust-core (Tauri)
 │ ├── plugin_system/ # Plugin system
 │ ├── ai/ # AI-modules
