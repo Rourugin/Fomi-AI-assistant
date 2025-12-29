@@ -176,7 +176,7 @@ impl SystemConstraints {
     }
 }
 
-struct Logger;
+pub struct Logger;
 
 impl Logger {
     fn log(&self, _message: &str) {

@@ -1,6 +1,20 @@
-use crate::plugin_system::{manifest::PluginManifest, permissions::PermissionChecker};
+use crate::plugin_system::permissions::{PermissionChecker, SecurityLevel, Logger};
+use crate::plugin_system::{manifest::PluginManifest, wasm_runtime::WasmRuntime};
 use std::collections::HashMap;
 use uuid::Uuid;
+
+
+enum PluginState {
+    Loading,
+    Active,
+    Error,
+}
+
+struct PluginInstance {
+    id: Uuid,
+    manifest: PluginManifest,
+    state: PluginState,
+}
 
 struct PluginManager {
     permission_checker: PermissionChecker,
@@ -22,5 +36,19 @@ impl PluginManager {
         }
     }
 
-    
+    fn load_plugin(path: PathBuf) {
+
+    }
+
+    fn unload_plugin() {
+
+    }
+
+    fn call_plugin() {
+
+    }
+
+    fn list_plugins() {
+
+    }
 }
