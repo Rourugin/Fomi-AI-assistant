@@ -91,6 +91,14 @@ button {
   margin-right: 5px;
 }
 
+#install-plugin-input {
+  margin-right: 5px;
+}
+
+#get-active-plugins-msg {
+  white-space: pre-wrap;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;

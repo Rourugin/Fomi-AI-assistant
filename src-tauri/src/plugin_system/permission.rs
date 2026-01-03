@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use serde_json::Value;
@@ -5,7 +6,7 @@ use std::hash::Hash;
 use uuid::Uuid;
 
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 enum FileAccessLevel {
     ReadOnly,
     ReadWrite,
@@ -13,14 +14,14 @@ enum FileAccessLevel {
     Full,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 enum NetworkAccessLevel {
     LocalOnly,
     SpecificDomains,
     FullInternet,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 enum SystemControl {
     ProcessManagement,
     WindowControl,
@@ -30,7 +31,7 @@ enum SystemControl {
     NotificationSend,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 enum PermissionStatus {
     Granted,
     Denied,
@@ -38,7 +39,7 @@ enum PermissionStatus {
     SystemDenied,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SecurityLevel {
     Low,
     Medium,
@@ -46,13 +47,13 @@ pub enum SecurityLevel {
     Paranoid,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum CheckResult{
     Granted,
     Denied(String),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Permission {
     FileSystem {
         path: PathBuf,

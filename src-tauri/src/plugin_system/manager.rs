@@ -1,54 +1,66 @@
-use crate::plugin_system::permissions::{PermissionChecker, SecurityLevel, Logger};
-use crate::plugin_system::{manifest::PluginManifest, wasm_runtime::WasmRuntime};
-use std::collections::HashMap;
-use uuid::Uuid;
+use std::{fs::{self, OpenOptions}, sync::Mutex};
+use serde_json::{from_reader, to_writer_pretty};
+use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 
-enum PluginState {
-    Loading,
-    Active,
-    Error,
+pub struct PluginManager {
+    names: Mutex<Vec<String>>,
+    config_file_path: PathBuf,
 }
 
-struct PluginInstance {
-    id: Uuid,
-    manifest: PluginManifest,
-    state: PluginState,
+#[derive(Serialize, Deserialize, Debug)]
+struct PluginData {
+    plugins: Vec<String>,
 }
-
-struct PluginManager {
-    permission_checker: PermissionChecker,
-    manifest: HashMap<Uuid, PluginManifest>,
-    loaded_plugins: HashMap<Uuid, PluginInstance>,
-    wasm_runtime: Option<WasmRuntime>,
-    logger: Logger,
-}
-
 
 impl PluginManager {
-    pub fn new() -> Self {
+    pub fn new(config_dir: PathBuf) -> Self {
+        let plugin_file_path = config_dir.join("plugins.json");
+        let initial_plugins = Self::load_from_file(plugin_file_path.clone()).unwrap_or_else(|_| {
+            Vec::new()
+        });
+
         PluginManager {
-            permission_checker: PermissionChecker::new(SecurityLevel::Medium),
-            manifest: HashMap::new(),
-            loaded_plugins: HashMap::new(),
-            wasm_runtime: None,
-            logger: Logger,
+            names: Mutex::new(initial_plugins),
+            config_file_path: plugin_file_path,
         }
     }
 
-    fn load_plugin(path: PathBuf) {
-
+    pub fn list_plugins(&self) -> Vec<String> {
+        let guard = self.names.lock().unwrap();
+        return guard.clone();
     }
 
-    fn unload_plugin() {
+    pub fn add_plugin(&self, name: String) {
+        {
+            let mut guard = self.names.lock().unwrap();
+            guard.push(name);
+        }
 
+        if let Err(e) = self.save_to_file() {
+            eprintln!("Failed to save plugins: {}", e);
+        }
     }
 
-    fn call_plugin() {
+    fn save_to_file(&self) -> Result<(), std::io::Error> {
+        let guard = self.names.lock().unwrap();
+        let data = PluginData {
+            plugins: guard.clone(),
+        };
+        let file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(&self.config_file_path)?;
 
+        to_writer_pretty(file, &data)?;
+        Ok(())
     }
 
-    fn list_plugins() {
-
+    fn load_from_file(path: PathBuf) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+        let file = fs::File::open(path)?;
+        let data: PluginData = from_reader(file)?;
+        Ok(data.plugins)
     }
 }

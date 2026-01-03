@@ -1,24 +1,28 @@
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-async fn greet(name: String) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+use tauri::Manager;
 
-#[tauri::command(rename_all = "snake_case")]
-async fn say_bye(input: String) -> String {
-    if input.to_lowercase().contains("hello") {
-        return format!("Bye!");
-    } else {
-        return format!("");
-    };
-}
+pub mod plugin_system;
+mod commands;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            let app_config_dir = app.path().app_config_dir().unwrap();
+
+            if !app_config_dir.exists() {
+                std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
+            };
+
+            let manager = plugin_system::manager::PluginManager::new(app_config_dir);
+            app.manage(manager);
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![say_bye, greet])
+        .invoke_handler(tauri::generate_handler![commands::general::say_bye, 
+            commands::general::greet, 
+            commands::plugins::get_active_plugins, 
+            commands::plugins::install_plugin])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
