@@ -1,83 +1,77 @@
-# Fomi - an AI Assistant 🤖
+<div align="center">
 
-> ⚠️ **The project is in the early stages of development** - this is still an architectural framework, not a finished product.
+# 🤖 Fomi AI Assistant
+### Fully Offline Modular Intelligence
 
-[![Rust](https://img.shields.io/badge/Rust-1.70+-orange.svg)](https://www.rust-lang.org/)
-[![Tauri](https://img.shields.io/badge/Tauri-2.0-purple.svg)](https://tauri.app/)
-[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-blue.svg)](https://github.com/yourname/ai-pc-assistant)
+[![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?style=for-the-badge&logo=tauri)](https://tauri.app/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey?style=for-the-badge&logo=linux)](https://github.com/Rourugin/AI-assistant)
+[![Model](https://img.shields.io/badge/AI%20Model-Llama%203.2%203B-yellow?style=for-the-badge&logo=meta)](https://huggingface.co/)
 
-## 🎯 Project philosophy
+*Your private, local, and extensible AI companion.*
 
-Fomi Assistant is a **fully local** alternative to cloud-based assistants. Your data stays on your device, and running on low-end hardware is our priority.
+[Report Bug](https://github.com/your-username/fomi/issues) · [Request Feature](https://github.com/your-username/fomi/issues)
 
-**Key principles:**
-- 🔒 **Privacy** — no cloud APIs, everything is local.
-- 🖥️ **Efficiency** — optimization for 8GB+ RAM
-- 🦀 **Reliability** — Rust core + secure plugin isolation
-- 🆓 **Openness** — MIT License, community first
-
-## 🚀 Current status
-
-**The project is under active development.** We are working on creating the core of the system.
-
-### ✅ What's already working:
-- Rust + Tauri project framework
-- Plugin manifest system with encapsulation
-- Basic permissions and security system
-
-### 🔄 What's in development now:
-- Plugin manager with loading/unloading
-- WASM runtime for plugin isolation
-- Voice interface integration
-
-### 📅 Roadmap (High-Level)
-1. **Phase 1**: System Framework (plugins, security, UI) — *current*
-2. **Phase 2**: AI Foundation (local LLM, STT/TTS models)
-3. **Phase 3**: Basic Plugins (PC Management, Games)
-4. **Phase 4**: Polishing and Ecosystem
-
-
-## 🏗️ Architecture
-
-Fomi-AI-Assistant/
-├── src-tauri/ # Rust-core (Tauri)
-│ ├── plugin_system/ # Plugin system
-│ ├── ai/ # AI-modules
-│ └── voice/ # Voice interface
-├── plugins/ # Plugins (WASM/native)
-└── models/ # Local AI-models
-
-
-**Texh stack:** Rust, Tauri, WASM, llama.cpp, whisper.cpp
-
-
-## 👨‍💻 For developers and observers
-
-The project is at the **architectural design stage**. This means:
-
-### You can:
-- Study architectural solutions
-- Follow developments through Issues and Commits
-- Discuss technical solutions (through Issues)
-
-### It's too early to:
-- Install and use
-- Submit code without a deep understanding of the architecture
-- Wait for a ready-made plugin API
-
-### If you're a Rust developer:
-The source code is of interest as an example of building a safe module system in Rust with encapsulation, traits, and a permissions system.
-
-## 📄 License
-
-The project's license has not yet been selected and will be determined at a later stage of development.
-
-## 🔗 Follow the development
-
-- **Repository:** [GitHub](https://github.com/Rourugin/AI-assistant)
-- **Discussion:** For now, via repository issues
-- **Contacts:** Will be added when the first working kernel is released
+</div>
 
 ---
 
-*This project is under active development. The API and architecture are subject to significant change.*
+## 🚀 About The Project
+
+**Fomi** is a local assistant built to respect your privacy. Unlike cloud AI (ChatGPT, Claude), Fomi runs **entirely on your hardware**. It uses a plugin system to interact with your OS, allowing it to perform real tasks, not just chat.
+
+### 🌟 Key Features
+* 🧠 **Local Brain**: Powered by `Llama-3.2-3B` (GGUF), running on CPU.
+* 🔌 **Plugin System**: Modular architecture using `Mutex` for thread-safe management.
+* 💾 **Persistence**: Remembers your settings and active plugins across restarts.
+* 🛡️ **Privacy First**: Zero data leaves your machine.
+
+---
+
+## 🏗️ Architecture Status
+
+| Module | Status | Tech Stack |
+| :--- | :--- | :--- |
+| **Core Framework** | ✅ Stable | Rust, Tauri 2.0 |
+| **Plugin Manager** | ✅ Stable | File System, Serde JSON |
+| **AI Engine** | 🚧 In Progress | `llama-cpp-2`, GGUF |
+| **UI / Frontend** | 🔄 Planned | HTML/JS (Later React/Svelte) |
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+* **Rust**: Stable toolchain.
+* **C++ Build Tools**: `cmake`, `clang` (required for AI engine compilation).
+* **Node.js**: For frontend bundling.
+
+### Installation
+
+1.  **Clone the repo**
+    ```bash
+    git clone [https://github.com/your-username/fomi.git](https://github.com/your-username/fomi.git)
+    ```
+2.  **Download the Brain**
+    * Get `Llama-3.2-3B-Instruct-Q4_K_M.gguf`.
+    * Place it in `src-tauri/models/model.gguf`.
+3.  **Run Development Build**
+    ```bash
+    cargo tauri dev
+    ```
+
+---
+
+## 🧩 Roadmap
+
+- [x] **Phase 1: Foundation** (Architecture, File System, Configs)
+- [ ] **Phase 2: The Brain** (Llama integration, Chat Loop) 
+- [ ] **Phase 3: The Body** (Connecting AI to Plugins)
+- [ ] **Phase 4: The Face** (Modern UI implementation)
+
+---
+
+<div align="center">
+    <i>Built with ❤️ in Rust</i>
+</div>
