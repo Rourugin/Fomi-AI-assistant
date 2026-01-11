@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+src-turi/target/*
+models/*
+promotion_strategy.md

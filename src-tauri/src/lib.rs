@@ -1,6 +1,8 @@
+use std::env;
 use tauri::Manager;
-
 pub mod plugin_system;
+mod session_manager;
+pub mod ai_engine;
 mod commands;
 
 
@@ -8,6 +10,29 @@ mod commands;
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
+            let model_path = env::current_dir()
+                .expect("Failed to get current directory")
+                .parent()
+                .expect("Failed to get parent directory")
+                .join("models/model.gguf");
+            match ai_engine::AiCore::new(model_path) {
+                Ok(core) => {
+                    println!("AI is alive");
+                    match session_manager::SessionManager::new(core) {
+                        Ok(manager) => {
+                            println!("Session started");
+                            app.manage(manager);
+                        }
+                        Err(e) => {
+                            println!("Session error: {}", e);
+                        }
+                    }
+                }
+                Err(e) => {
+                    eprintln!("Ai error: {}", e);
+                }
+            }
+
             let app_config_dir = app.path().app_config_dir().unwrap();
 
             if !app_config_dir.exists() {
@@ -20,7 +45,10 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![commands::general::say_bye, 
-            commands::general::greet, 
+            commands::general::greet,
+            commands::general::fomi_wake_up,
+            commands::general::fomi_reset,
+            commands::general::fomi_think, 
             commands::plugins::get_active_plugins, 
             commands::plugins::install_plugin])
         .run(tauri::generate_context!())

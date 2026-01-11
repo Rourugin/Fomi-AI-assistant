@@ -1,0 +1,99 @@
+use llama_cpp_2::{model::{AddBos, LlamaModel, Special, params::LlamaModelParams}, token::{LlamaToken, data_array::LlamaTokenDataArray}};
+use llama_cpp_2::{context::{LlamaContext, params::LlamaContextParams}, llama_backend::LlamaBackend, llama_batch::LlamaBatch};
+use std::{path::PathBuf, sync::Arc};
+use ouroboros::{self_referencing};
+use llama_cpp_sys_2::llama_pos;
+
+
+pub struct AiCore {
+    model: Arc<LlamaModel>,
+    _backend: Arc<LlamaBackend>,
+}
+
+impl AiCore {
+    pub fn new(path: PathBuf) -> Result<AiCore, Box<dyn std::error::Error>> {
+        let backend = Arc::new(LlamaBackend::init()?);
+        let params = LlamaModelParams::default();
+        let model = Arc::new(LlamaModel::load_from_file(&backend, path, &params)
+            .map_err(|e|format!("Failed to load model: {}", e))?);
+        
+        Ok(AiCore {
+            model,
+            _backend: backend,
+        })
+    }
+
+    pub fn start_session(&self) -> Result<AiSession, Box<dyn std::error::Error>> {
+        AiSessionTryBuilder {
+            model_handle: self.model.clone(),
+            history: Vec::new(),
+            context_builder: |model_handle| {
+                model_handle
+                    .new_context(&self._backend, LlamaContextParams::default())
+                    .map_err(|e| Box::new(e) as Box<dyn std::error::Error>) 
+            },
+        }.try_build()
+    }
+}
+
+
+#[self_referencing]
+pub struct AiSession {
+    model_handle: Arc<LlamaModel>,
+    history: Vec<LlamaToken>,
+    #[borrows(model_handle)]
+    #[covariant]
+    context: LlamaContext<'this>,
+}
+
+impl AiSession {
+    pub fn infer(&mut self, text: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let mut batch = LlamaBatch::new(2048, 1);
+        self.with_mut(|fields| {
+            let add_bos = if fields.history.is_empty() {
+                AddBos::Always
+            } else {
+                AddBos::Never
+            };
+
+            let new_tokens = fields.model_handle
+                .str_to_token(text, add_bos)
+                .map_err(|e| format!("Tokenize error: {}", e))?;
+            batch.clear();
+            let last_index = new_tokens.len().saturating_sub(1);
+            for (i, token) in new_tokens.iter().enumerate() {
+                let pos = fields.history.len() as i32;
+                fields.history.push(*token);
+                batch.add(*token, llama_pos::from(pos), &[0], i == last_index)?;
+            }
+            fields.context.decode(&mut batch).map_err(|e|format!("Decode prompt error: {}", e))?;
+
+            let mut response_text = String::new();
+            for _ in 0..1000 {
+                let logits = fields.context.candidates_ith(batch.n_tokens() - 1).collect();
+                let mut next_token_data = LlamaTokenDataArray::new(logits, false);
+                let next_token = next_token_data.sample_token_greedy();
+
+                if fields.model_handle.token_eos() == next_token {
+                    break;
+                }
+
+                let token_str = fields.model_handle
+                    .token_to_str(next_token, Special::Plaintext)
+                    .unwrap_or(String::new());
+                response_text.push_str(&token_str);
+                batch.clear();
+                let pos = fields.history.len() as i32;
+                fields.history.push(next_token);
+                batch.add(next_token, llama_pos::from(pos), &[0], true)?;
+                fields.context.decode(&mut batch)
+                    .map_err(|e| format!("Decode prompt error: {}", e))?;
+            }
+
+            Ok(response_text)
+        })
+    }
+}
+
+unsafe impl Send for AiSession {}
+unsafe impl Sync for AiSession {}
