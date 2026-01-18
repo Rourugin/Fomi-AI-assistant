@@ -52,8 +52,8 @@ To keep development active without selling user data, we plan two revenue stream
 | :--- | :--- | :--- |
 | **Core Framework** | ✅ Stable | Rust, Tauri 2.0 |
 | **Plugin Manager** | ✅ Stable | File System, Serde JSON |
-| **AI Engine** | 🚧 In Progress | `llama-cpp-2`, GGUF |
-| **UI / Frontend** | 🔄 Planned | HTML/JS (Later React/Svelte) |
+| **AI Engine**      | ✅ Stable | `llama-cpp-2`, GGUF |
+| **UI / Frontend**  | 🚧 In Progress | HTML/JS (Later React/Svelte) |
 
 ---
 
@@ -83,9 +83,16 @@ To keep development active without selling user data, we plan two revenue stream
 ## 🧩 Roadmap
 
 - [x] **Phase 1: Foundation** (Architecture, File System, Configs)
-- [ ] **Phase 2: The Brain** (Llama integration, Chat Loop) 
+- [x] **Phase 2: The Brain** (Llama integration, Chat Loop) 
 - [ ] **Phase 3: The Body** (Connecting AI to Plugins)
 - [ ] **Phase 4: The Face** (Modern UI implementation)
+
+---
+
+## 🤝 Community
+
+Join the development discussion!
+[**Click here to join our Discord Server**](https://discord.gg/7cDum5pk)
 
 ---
 
