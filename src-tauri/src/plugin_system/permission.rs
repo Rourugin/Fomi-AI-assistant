@@ -370,7 +370,7 @@ impl PermissionChecker {
         let mut results = Vec::new();
 
         for (plugin_id, policy) in &self.plugin_policies {
-            for (permission, status) in policy.permissions {
+            for (permission, status) in policy.permissions.clone() {
                 if PermissionStatus::NotDecided == status {
                     results.push((plugin_id.clone(), permission.clone()))
                 }

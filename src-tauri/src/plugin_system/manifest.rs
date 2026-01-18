@@ -1,8 +1,10 @@
-use crate::plugin_system::permissions::Permission; 
+use crate::plugin_system::permission::Permission; 
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use uuid::Uuid;
 
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct PluginManifest {
     id: Uuid,
     name: String,
