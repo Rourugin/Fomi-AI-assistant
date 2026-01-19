@@ -89,25 +89,12 @@ To keep development active without selling user data, we plan two revenue stream
 
 ---
 
-## 🤝 Community
+## 🤝 Community & Contributing
 
 Join the development discussion!
 [**Click here to join our Discord Server**](https://discord.gg/7cDum5pk)
 
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Since Fomi is in the architectural phase, we appreciate:
-
-1.  **Discussions**: Join the [Issues](https://github.com/Rourugin/Fomi-AI-assistant/issues) to discuss architecture and plugin API design.
-2.  **Code**: If you want to fix a bug or optimize the Rust core, please fork the repository and create a Pull Request.
-3.  **Ideas**: Have an idea for a plugin? Open a "Feature Request" issue.
-
-**Development Setup:**
-1.  Ensure you have `Rust`, `Node.js`, and `C++ Build Tools` (CMake, Clang) installed.
-2.  Clone repo: `git clone https://github.com/Rourugin/Fomi-AI-assistant`
-3.  Run: `npm install && cargo tauri dev`
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
 
 ---
 
