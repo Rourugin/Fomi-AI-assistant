@@ -1,6 +1,6 @@
 use llama_cpp_2::{model::{AddBos, LlamaModel, Special, params::LlamaModelParams}, token::{LlamaToken, data_array::LlamaTokenDataArray}};
 use llama_cpp_2::{context::{LlamaContext, params::LlamaContextParams}, llama_backend::LlamaBackend, llama_batch::LlamaBatch};
-use std::{path::PathBuf, sync::Arc};
+use std::{num::NonZeroU32, path::PathBuf, sync::Arc};
 use ouroboros::{self_referencing};
 use llama_cpp_sys_2::llama_pos;
 
@@ -24,12 +24,13 @@ impl AiCore {
     }
 
     pub fn start_session(&self) -> Result<AiSession, Box<dyn std::error::Error>> {
+        let context_params = LlamaContextParams::default();
         AiSessionTryBuilder {
             model_handle: self.model.clone(),
             history: Vec::new(),
             context_builder: |model_handle| {
                 model_handle
-                    .new_context(&self._backend, LlamaContextParams::default())
+                    .new_context(&self._backend, context_params.with_n_ctx(Some(NonZeroU32::new(4096).unwrap())))
                     .map_err(|e| Box::new(e) as Box<dyn std::error::Error>) 
             },
         }.try_build()

@@ -2,31 +2,42 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fomi Assistant</title>
-    <script type="module" src="/main.js" defer></script>
+    <link rel="stylesheet" href="styles/main.css" />
+    <script type="module" src="/scripts/main.js" defer></script>
   </head>
 
   <body>
-    <main class="container">
-      <h1>Hiiiiiii, how can I help you? (｡◕‿‿◕｡)</h1>
+    <div id="character-container" data-tauri-drag-region="true">
+      <img 
+        src="assets/fomi/fomi-idle.png" 
+        id="fomi-avatar" 
+        draggable="false" 
+        data-tauri-drag-region="true"
+      />
+    </div>
 
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
-      <p id="bye-msg"></p>
-      <form class="row" id="install-plugin-form">
-        <input id="install-plugin-input" placeholder="Enter a plugin name..." />
-        <button type="submit">Install</button>
-      </form>
-      <p id="install-plugin-msg"></p>
-      <form class="row" id="get-active-plugins-form">
-        <button type="submit">Show plugin list</button>
-      </form>
-      <p id="get-active-plugins-msg"></p>
-    </main>
+    <div id="subtitle-container" class="hidden">
+      <p id="subtitle-text"></p>
+    </div>
+
+    <div id="context-menu" class="hidden">
+      <div class="menu-item" id="menu-open-dashboard">🎛 Dashboard</div>
+      <div class="menu-item" id="menu-reset">🧠 Reset Memory</div>
+      <div class="separator"></div>
+      <div class="menu-item danger" id="menu-close">❌ Close Fomi</div>
+    </div>
+
+    <div id="dashboard-layer" class="hidden">
+      <h2 class="dashboard-title">Dashboard Placeholder</h2>
+
+      <div class="chat-controls">
+        <input type="text" id="dashboard-input" placeholder="Say something to Fomi" />
+        <button id="dashboard-send">Send</button>
+      </div>
+
+      <button id="btn-close-dash" class="dashboard-close-btn">Close</button>
+    </div>
   </body>
 </html>

@@ -44,8 +44,7 @@ pub fn run() {
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![commands::general::say_bye, 
-            commands::general::greet,
+        .invoke_handler(tauri::generate_handler![
             commands::general::fomi_wake_up,
             commands::general::fomi_reset,
             commands::general::fomi_think, 

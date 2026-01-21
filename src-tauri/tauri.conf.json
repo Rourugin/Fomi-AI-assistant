@@ -10,9 +10,16 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "fomi-assistant",
-        "width": 800,
-        "height": 600
+        "label": "main",
+        "title": "Fomi AI",
+        "width": 450,        
+        "height": 600,       
+        "resizable": false,  
+        "decorations": false, 
+        "transparent": true,  
+        "alwaysOnTop": true,  
+        "visible": true,
+        "devtools": true
       }
     ],
     "security": {
