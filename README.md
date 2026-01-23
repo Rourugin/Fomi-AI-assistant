@@ -1,6 +1,11 @@
 <div align="center">
 
 # 🤖 Fomi AI Assistant
+
+<div align="center">
+  <img src=".github/assets/demo-preview.gif" width="600" alt="Fomi Demo Preview">
+</div>
+
 ### Fully Offline Modular Intelligence
 
 [![Rust](https://img.shields.io/badge/Rust-1.75%2B-orange?style=for-the-badge&logo=rust)](https://www.rust-lang.org/)
