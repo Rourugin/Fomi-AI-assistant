@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[allow(dead_code)]
 enum FileAccessLevel {
     ReadOnly,
     ReadWrite,
@@ -15,6 +16,7 @@ enum FileAccessLevel {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[allow(dead_code)]
 enum NetworkAccessLevel {
     LocalOnly,
     SpecificDomains,
@@ -22,6 +24,7 @@ enum NetworkAccessLevel {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[allow(dead_code)]
 enum SystemControl {
     ProcessManagement,
     WindowControl,
@@ -32,6 +35,7 @@ enum SystemControl {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(dead_code)]
 enum PermissionStatus {
     Granted,
     Denied,
@@ -40,6 +44,7 @@ enum PermissionStatus {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub enum SecurityLevel {
     Low,
     Medium,
@@ -48,12 +53,14 @@ pub enum SecurityLevel {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub enum CheckResult{
     Granted,
     Denied(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[allow(dead_code)]
 pub enum Permission {
     FileSystem {
         path: PathBuf,
@@ -121,7 +128,7 @@ impl std::hash::Hash for Permission {
     }
 }
 
-
+#[allow(dead_code)]
 struct PluginPolicy {
     plugin_id: Uuid,
     permissions: HashMap<Permission, PermissionStatus>,
@@ -155,6 +162,7 @@ impl PluginPolicy {
     }
 }
 
+#[allow(dead_code)]
 struct SystemConstraints {
     denied_paths: Vec<String>,
     denied_domains: Vec<String>,
@@ -177,6 +185,7 @@ impl SystemConstraints {
     }
 }
 
+#[allow(dead_code)]
 pub struct Logger;
 
 impl Logger {
@@ -186,6 +195,7 @@ impl Logger {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct CheckContext {
     pub is_screen_locked: bool,
     pub battery_level: Option<u8>,
@@ -202,6 +212,7 @@ impl Default for CheckContext {
     }
 }
 
+#[allow(dead_code)]
 pub struct PermissionChecker {
     plugin_policies: HashMap<Uuid, PluginPolicy>,
     system_constraints: SystemConstraints,

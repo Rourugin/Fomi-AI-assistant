@@ -12,14 +12,15 @@
       {
         "label": "main",
         "title": "Fomi AI",
-        "width": 450,        
-        "height": 600,       
+        "width": 600,        
+        "height": 800,       
         "resizable": false,  
         "decorations": false, 
         "transparent": true,  
         "alwaysOnTop": true,  
         "visible": true,
-        "devtools": true
+        "devtools": true,
+        "shadow": false
       }
     ],
     "security": {
