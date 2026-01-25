@@ -23,11 +23,12 @@ impl AiCore {
         })
     }
 
-    pub fn start_session(&self) -> Result<AiSession, Box<dyn std::error::Error>> {
+    pub fn start_session(&self, system_prompt: &str) -> Result<AiSession, Box<dyn std::error::Error>> {
         let context_params = LlamaContextParams::default();
+        let prompt_tokens = self.model.str_to_token(system_prompt, AddBos::Always)?;
         AiSessionTryBuilder {
             model_handle: self.model.clone(),
-            history: Vec::new(),
+            history: prompt_tokens,
             context_builder: |model_handle| {
                 model_handle
                     .new_context(&self._backend, context_params.with_n_ctx(Some(NonZeroU32::new(4096).unwrap())))

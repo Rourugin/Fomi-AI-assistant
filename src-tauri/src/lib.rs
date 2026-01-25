@@ -47,7 +47,9 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::general::fomi_wake_up,
             commands::general::fomi_reset,
-            commands::general::fomi_think, 
+            commands::general::fomi_think,
+            commands::general::get_personalities,
+            commands::general::set_personality,
             commands::plugins::get_active_plugins, 
             commands::plugins::install_plugin])
         .run(tauri::generate_context!())
