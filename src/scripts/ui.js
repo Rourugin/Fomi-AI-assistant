@@ -3,7 +3,6 @@ const ASSETS = {
   think: 'assets/fomi/fomi-think.png',
   talk: 'assets/fomi/fomi-talk.png'
 };
-
 const imageCache = {};
 
 export const preloadImages = () => {
@@ -43,3 +42,21 @@ export const showSubtitle = async (text) => {
   }, 5000);
 };
 
+export const showPersonalities = async (names, currentPersonality) => {
+  const personalityContainer = document.getElementById('personality-container');
+  if (!personalityContainer) {
+    return;
+  }
+  personalityContainer.innerHTML = '';
+
+  for (let i = 0; i < names.length; i++) {
+    const newBtn = document.createElement('button');
+    newBtn.textContent = names[i];
+    newBtn.classList.add('personality-btn');
+    if (newBtn.textContent == currentPersonality) {
+      newBtn.classList.add('active');
+    }
+    newBtn.id = 'btn-personality-${i}';
+    personalityContainer.appendChild(newBtn);
+  }
+};

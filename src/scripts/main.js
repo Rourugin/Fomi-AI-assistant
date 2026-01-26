@@ -9,10 +9,12 @@ const contextMenu = document.getElementById('context-menu');
 const dashboard = document.getElementById('dashboard-layer');
 
 const dashInput = document.getElementById('dashboard-input');
+const personalityContainer = document.getElementById('personality-container');
 const dashSendBtn = document.getElementById('dashboard-send');
 const dashCloseBtn = document.getElementById('btn-close-dash');
 
 let isThink = false;
+let currentPersonality = 'standard';
 ui.preloadImages();
 
 characterContainer.addEventListener('contextmenu', (e) => {
@@ -32,6 +34,7 @@ document.addEventListener('mousedown', (e) => {
 });
 
 document.getElementById('menu-open-dashboard').addEventListener('click', () => {
+  loadPersonalities();
   dashboard.classList.remove('hidden');
   contextMenu.classList.add('hidden');
 });
@@ -70,6 +73,15 @@ dashSendBtn.addEventListener('click', async () => {
   await thinkInput(text);
 });
 
+personalityContainer.addEventListener('click', async (event) => {
+  if (event.target) {
+    const clickedBtn = event.target;
+    currentPersonality = clickedBtn.text;
+    await api.setPersonalities(currentPersonality);
+  }
+});
+
+
 async function thinkInput(text) {
   if (isThink) return;
   isThink = true;
@@ -85,4 +97,11 @@ async function thinkInput(text) {
     isThink = false;
     ui.setAvatarState('idle');
   }
+}
+
+async function loadPersonalities() {
+  const names = await api.getPersonalities();
+  dashboard.style.cursor = "wait";
+  await ui.showPersonalities(names, currentPersonality);
+  dashboard.style.cursor = "default";
 }

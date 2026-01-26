@@ -126,7 +126,6 @@ html, body {
   margin: 4px 0;
 }
 
-
 #dashboard-layer {
   position: absolute;
   top: 50%; 
@@ -240,6 +239,46 @@ button:active {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+.personality-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.personality-btn {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+}
+
+.personality-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+  background: rgba(203, 166, 247, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.personality-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #1e1e2e;
+  box-shadow: 0 0 20px var(--accent-glow);
+  transform: translateY(0);
+}
+
+.personality-btn:active {
+  transform: scale(0.95);
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
