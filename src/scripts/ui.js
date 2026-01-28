@@ -52,11 +52,11 @@ export const showPersonalities = async (names, currentPersonality) => {
   for (let i = 0; i < names.length; i++) {
     const newBtn = document.createElement('button');
     newBtn.textContent = names[i];
+    newBtn.title = names[i];
     newBtn.classList.add('personality-btn');
     if (newBtn.textContent == currentPersonality) {
       newBtn.classList.add('active');
     }
-    newBtn.id = 'btn-personality-${i}';
     personalityContainer.appendChild(newBtn);
   }
 };

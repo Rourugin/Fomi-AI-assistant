@@ -74,11 +74,13 @@ dashSendBtn.addEventListener('click', async () => {
 });
 
 personalityContainer.addEventListener('click', async (event) => {
-  if (event.target) {
-    const clickedBtn = event.target;
-    currentPersonality = clickedBtn.text;
-    await api.setPersonalities(currentPersonality);
+  const clickedBtn = event.target.closest('.personality-btn');
+  if (!clickedBtn) {
+    return;
   }
+  currentPersonality = clickedBtn.title;
+  await api.setPersonality(currentPersonality);
+  loadPersonalities();
 });
 
 
@@ -102,6 +104,14 @@ async function thinkInput(text) {
 async function loadPersonalities() {
   const names = await api.getPersonalities();
   dashboard.style.cursor = "wait";
+  for (let i = 0; i < names.length; i++) {
+    if (names[i] == 'standard') {
+      names.splice(i, 1);
+      break;
+    }
+  }
+  names.sort();
+  names.unshift('standard');
   await ui.showPersonalities(names, currentPersonality);
   dashboard.style.cursor = "default";
 }
