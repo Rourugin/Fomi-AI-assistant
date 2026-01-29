@@ -9,24 +9,14 @@ pub struct SessionManager {
 }
 
 impl SessionManager {
-    pub fn new(core: AiCore) -> Result<SessionManager, Box<dyn std::error::Error>> {
-        let system_prompt = "You are Fomi.".to_string();
+    pub fn new(core: AiCore, system_prompt: &str) -> Result<SessionManager, Box<dyn std::error::Error>> {
         let new_session = core.start_session(&system_prompt)
             .map_err(|e| format!("Failed to create new session: {}", e))?;
         Ok(SessionManager {
             core, 
             session: Mutex::new(Option::from(new_session)), 
-            current_system_prompt: Mutex::new(system_prompt),
+            current_system_prompt: Mutex::new(system_prompt.to_string()),
         })
-    }
-
-    pub fn wake_up(&self) -> Result<(), Box<dyn std::error::Error>> {
-        let mut guard = self.session.lock().unwrap();
-        if guard.is_none() {
-            let new_session = self.core.start_session("You are Fomi.")?;
-            *guard = Some(new_session);
-        }     
-        Ok(())  
     }
 
     pub fn reset(&self) -> Result<(), Box<dyn std::error::Error>> {
@@ -50,9 +40,10 @@ impl SessionManager {
 
     pub fn think(&self, text: &str) -> Result<String, String> {
         let mut guard = self.session.lock().unwrap();
+        let mut prompt_guard = self.current_system_prompt.lock().unwrap();
         let mut answer = "Fomi is asleep! you need to wake her up".to_string();
         if let Some(session) = guard.as_mut() {
-            answer = session.infer(text).map_err(|e| format!("{}", e))?;
+            answer = session.infer(text, &prompt_guard).map_err(|e| format!("{}", e))?;
         }
         Ok(answer)
     }

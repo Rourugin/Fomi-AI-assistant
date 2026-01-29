@@ -1,12 +1,7 @@
 use std::{fmt::format, fs};
-
 use tauri::{Manager, utils::{config::AppImageConfig, resources}};
 use crate::session_manager;
 
-#[tauri::command]
-pub async fn fomi_wake_up(state: tauri::State<'_, session_manager::SessionManager>) -> Result<(), String> {
-    state.wake_up().map_err(|e| e.to_string())
-}
 
 #[tauri::command]
 pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>) -> Result<(), String> {

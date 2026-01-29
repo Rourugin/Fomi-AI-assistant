@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, fs};
 use tauri::Manager;
 pub mod plugin_system;
 mod session_manager;
@@ -18,7 +18,12 @@ pub fn run() {
             match ai_engine::AiCore::new(model_path) {
                 Ok(core) => {
                     println!("AI is alive");
-                    match session_manager::SessionManager::new(core) {
+                    let personality_path = app.path()
+                        .resolve("assets/personalities/standard.md", tauri::path::BaseDirectory::Resource)
+                        .expect("Failed to resolve standard personality path");
+                    let initial_prompt = fs::read_to_string(&personality_path)
+                        .unwrap_or_else(|_| "You are Fomi, a helpful assistant.".to_string());
+                    match session_manager::SessionManager::new(core, &initial_prompt) {
                         Ok(manager) => {
                             println!("Session started");
                             app.manage(manager);
@@ -45,7 +50,6 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
-            commands::general::fomi_wake_up,
             commands::general::fomi_reset,
             commands::general::fomi_think,
             commands::general::get_personalities,
