@@ -9,17 +9,33 @@
   </head>
 
   <body>
-    <div id="character-container" data-tauri-drag-region="true">
+    <div id="character-container">
       <img 
         src="assets/fomi/fomi-idle.png" 
         id="fomi-avatar" 
         draggable="false" 
-        data-tauri-drag-region="true"
       />
-    </div>
 
-    <div id="subtitle-container" class="hidden">
-      <p id="subtitle-text"></p>
+      <div id="subtitle-container" class="hidden">
+        <p id="subtitle-text"></p>
+      </div>
+
+      <div id="dashboard-layer" class="hidden">
+        <h2 class="dashboard-title">Dashboard Placeholder</h2>
+
+        <div class="chat-controls">
+          <input type="text" id="dashboard-input" placeholder="Say something to Fomi" />
+          <button id="dashboard-send">Send</button>
+        </div>
+
+        <div class="separator"></div>
+        <h3 class="dashboard-title">Personality Core</h3>
+        <div id="personality-container" class="personality-grid"></div>
+        <div class="separator"></div>
+
+        <div class="separator"></div>
+        <button id="btn-close-dash" class="dashboard-close-btn">Close</button>
+      </div>
     </div>
 
     <div id="context-menu" class="hidden">
@@ -27,23 +43,6 @@
       <div class="menu-item" id="menu-reset">🧠 Reset Memory</div>
       <div class="separator"></div>
       <div class="menu-item danger" id="menu-close">❌ Close Fomi</div>
-    </div>
-
-    <div id="dashboard-layer" class="hidden">
-      <h2 class="dashboard-title">Dashboard Placeholder</h2>
-
-      <div class="chat-controls">
-        <input type="text" id="dashboard-input" placeholder="Say something to Fomi" />
-        <button id="dashboard-send">Send</button>
-      </div>
-
-      <div class="separator"></div>
-      <h3 class="dashboard-title">Personality Core</h3>
-      <div id="personality-container" class="personality-grid"></div>
-      <div class="separator"></div>
-
-      <div class="separator"></div>
-      <button id="btn-close-dash" class="dashboard-close-btn">Close</button>
     </div>
   </body>
 </html>

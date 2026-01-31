@@ -14,28 +14,46 @@ const dashSendBtn = document.getElementById('dashboard-send');
 const dashCloseBtn = document.getElementById('btn-close-dash');
 
 let isThink = false;
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
 let currentPersonality = 'standard';
 ui.preloadImages();
 
-characterContainer.addEventListener('contextmenu', (e) => {
-  e.preventDefault();
 
-  if (e.target.id === 'fomi-avatar') {
-      contextMenu.style.left = `${e.clientX}px`;
-      contextMenu.style.top = `${e.clientY}px`;
+characterContainer.addEventListener('contextmenu', (event) => {
+    event.preventDefault();
+
+  if (event.target.id === 'fomi-avatar') {
+      contextMenu.style.left = `${event.clientX}px`;
+      contextMenu.style.top = `${event.clientY}px`;
       contextMenu.classList.remove('hidden');
   }
 });
 
-document.addEventListener('mousedown', (e) => {
-  if (!contextMenu.classList.contains('hidden') && !contextMenu.contains(e.target)) {
+characterContainer.addEventListener('mousedown', (event) => {
+  isDragging = true;
+  characterContainer.style.cursor = "grabbing";
+
+  const rect = characterContainer.getBoundingClientRect();
+  offsetX = event.clientX - rect.left;
+  offsetY = event.clientY - rect.top;
+});
+
+document.addEventListener('mousedown', (event) => {
+  if (!contextMenu.classList.contains('hidden') && !contextMenu.contains(event.target)) {
     contextMenu.classList.add('hidden');
   }
 });
 
-document.getElementById('menu-open-dashboard').addEventListener('click', () => {
-  loadPersonalities();
+document.getElementById('menu-open-dashboard').addEventListener('click', async () => {
+  const avatar = document.getElementById('fomi-avatar');
+  const avatarRect = avatar.getBoundingClientRect();
+
   dashboard.classList.remove('hidden');
+  await loadPersonalities();
+
+  positionDashboardNearAvatar(avatarRect);
   contextMenu.classList.add('hidden');
 });
 
@@ -60,7 +78,7 @@ document.getElementById('menu-close').addEventListener('click', async () => {
   }
 });
 
-dashCloseBtn.addEventListener('click', () => {
+dashCloseBtn.addEventListener('click', async () => {
   dashboard.classList.add('hidden');
 });
 
@@ -73,6 +91,12 @@ dashSendBtn.addEventListener('click', async () => {
   await thinkInput(text);
 });
 
+dashInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    dashSendBtn.click();
+  }
+})
+
 personalityContainer.addEventListener('click', async (event) => {
   const clickedBtn = event.target.closest('.personality-btn');
   if (!clickedBtn) {
@@ -81,6 +105,24 @@ personalityContainer.addEventListener('click', async (event) => {
   currentPersonality = clickedBtn.title;
   await api.setPersonality(currentPersonality);
   loadPersonalities();
+});
+
+document.addEventListener('mousemove', (event) => {
+  if (!isDragging) {
+    return;
+  }
+
+  const newX = event.clientX - offsetX;
+  const newY = event.clientY - offsetY;
+
+  characterContainer.style.position = "absolute";
+  characterContainer.style.left = newX + 'px';
+  characterContainer.style.top = newY + 'px';
+});
+
+document.addEventListener('mouseup', async (event) => {
+    isDragging = false;
+    characterContainer.style.cursor = "grab";
 });
 
 
@@ -114,4 +156,25 @@ async function loadPersonalities() {
   names.unshift('standard');
   await ui.showPersonalities(names, currentPersonality);
   dashboard.style.cursor = "default";
+}
+
+function positionDashboardNearAvatar(avatarRect) {
+  const dashRect = dashboard.getBoundingClientRect();
+  const margin = 20;
+
+  let left = avatarRect.right + margin;
+  let top = avatarRect.top;
+
+  if (left + dashRect.width > window.innerWidth) {
+    left = avatarRect.left - dashRect.width - margin;
+  }
+  if (top + dashRect.height > window.innerHeight) {
+    top = window.innerHeight - dashRect.height - margin;
+  }
+  if (top < margin) {
+    top = margin;
+  }
+
+  dashboard.style.left = `${left}px`;
+  dashboard.style.top = `${top}px`;
 }

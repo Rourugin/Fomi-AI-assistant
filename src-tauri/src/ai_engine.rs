@@ -64,6 +64,7 @@ impl AiSession {
             prompt.push_str("<|end_header_id|>\n\n");
             prompt.push_str(text);
             prompt.push_str("<|eot_id|>");
+
             let new_tokens = fields.model_handle
                 .str_to_token(&prompt, add_bos)
                 .map_err(|e| format!("Tokenize error: {}", e))?;

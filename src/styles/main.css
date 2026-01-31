@@ -1,4 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+
 :root {
+  --font-main: 'Comfortaa', cursive, sans-serif;
   --bg-glass: rgba(20, 20, 35, 0.6);
   --border-glass: rgba(255, 255, 255, 0.1);
   --accent: #cba6f7;
@@ -6,7 +10,8 @@
   --text-primary: #ffffff;
   --text-secondary: #a6adc8;
   --danger: #f38ba8;
-  --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bold-color: #ff9e64;
+  --link-color: #7aa2f7;
 }
 
 html, body {
@@ -17,6 +22,7 @@ html, body {
   overflow: hidden;
   font-family: var(--font-main);
   user-select: none;
+  pointer-events: none;
 }
 
 #character-container {
@@ -25,14 +31,14 @@ html, body {
   left: 0;
   width: 100vw;       
   height: 100vh;      
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  display: block;
   z-index: 10;        
   pointer-events: none;
+  top: 0;
 }
 
 #fomi-avatar {
+  position: absolute;
   max-width: 100%;
   max-height: 90vh;
   object-fit: contain;
@@ -41,6 +47,8 @@ html, body {
   -webkit-user-drag: none;
   cursor: grab;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+  bottom: 0;
+  right: 50px;
 }
 
 #fomi-avatar:active {
@@ -50,7 +58,7 @@ html, body {
 
 #subtitle-container {
   position: absolute;
-  bottom: 40px;
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
   width: auto;
@@ -59,6 +67,18 @@ html, body {
   z-index: 20;
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
+  padding: 10px;
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  bottom: 80px;
+  min-width: 400px;
+  max-width: 90vw;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
 }
 
 #subtitle-container.hidden {
@@ -69,16 +89,52 @@ html, body {
 
 #subtitle-text {
   display: inline-block;
-  background: rgba(0, 0, 0, 0.75);
-  color: var(--text-primary);
   padding: 12px 24px;
   border-radius: 30px;
-  font-size: 18px;
-  font-weight: 500;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   letter-spacing: 0.5px;
-  border: 1px solid var(--border-glass);
+  text-align: left;
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+  line-height: 1.2;
+  text-shadow: 
+    3px 3px 0 #000,
+    -3px 3px 0 #000,
+    -3px -3px 0 #000,
+    3px -3px 0 #000,
+    3px 0px 0 #000,
+    0px 3px 0 #000,
+    -3px 0px 0 #000,
+    0px -3px 0 #000;
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+#subtitle-text strong, 
+#subtitle-text b {
+  color: var(--accent);
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(203, 166, 247, 0.4);
+}
+
+#subtitle-text em, 
+#subtitle-text i {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+#subtitle-text blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 10px 0;
+  padding-left: 10px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0 4px 4px 0;
 }
 
 #context-menu {
@@ -127,29 +183,23 @@ html, body {
 }
 
 #dashboard-layer {
-  position: absolute;
-  top: 50%; 
-  left: 50%; 
-  transform: translate(-50%, -50%);
-  width: 85%; 
+  position: fixed;
+  width: 400px;
   height: auto;
   min-height: 200px;
   max-height: 80vh;
-  
   background: rgba(23, 23, 33, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-glass);
   border-radius: 24px;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-  
   padding: 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
   z-index: 50000 !important;
   pointer-events: auto;
-  
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
@@ -158,11 +208,12 @@ html, body {
 #dashboard-layer:not(.hidden) {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, -50%) scale(1);
+  transform: scale(1) translateY(0);
 }
 
 #dashboard-layer.hidden {
-  transform: translate(-50%, -45%) scale(0.95);
+  opacity: 0;
+  transform: scale(0.95) translateY(-20px);
   pointer-events: none;
 }
 
@@ -202,6 +253,11 @@ html, body {
   color: var(--text-secondary);
 }
 
+#dashboard-layer,
+#context-menu {
+  pointer-events: auto;
+}
+
 button {
   background: var(--accent);
   color: #1e1e2e;
@@ -239,6 +295,16 @@ button:active {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
+}
+
+#fomi-avatar,
+#dashboard-layer,
+#context-menu,
+#dashboard-input,
+#dashboard-send,
+#btn-close-dash,
+.personality-btn {
+  pointer-events: auto !important;
 }
 
 .personality-grid {

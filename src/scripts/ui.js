@@ -1,3 +1,5 @@
+import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
+
 const ASSETS = {
   idle: 'assets/fomi/fomi-idle.png',
   think: 'assets/fomi/fomi-think.png',
@@ -27,14 +29,23 @@ export const showSubtitle = async (text) => {
   const subtitleBox = document.getElementById('subtitle-container');
   const subtitleText = document.getElementById('subtitle-text');
 
+  const cleanText = text.replace('assistant', '').trim();
+  let answer = "";
+
   subtitleBox.classList.remove('hidden');
+  subtitleText.innerHTML = "";
   subtitleText.textContent = "";
   setAvatarState('talk');
 
-  for (let i = 0; i < text.length; i++) {
-    subtitleText.textContent += text[i];
-    await new Promise(r => setTimeout(r, 30));
+  for (let i = 0; i < cleanText.length; i++) {
+    answer += cleanText[i];
+    subtitleText.textContent = answer;
+
+    await new Promise(r => setTimeout(r, 50));
   }
+
+  subtitleText.innerHTML = marked.parse(cleanText);
+  await new Promise(r => setTimeout(r, 150));
 
   setAvatarState('idle');
   setTimeout(() => {
