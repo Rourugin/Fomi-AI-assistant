@@ -4,6 +4,11 @@ use crate::session_manager;
 
 
 #[tauri::command]
+pub async fn set_ignore_cursor(window: tauri::Window, ignore: bool) -> Result<(), String> {
+  window .set_ignore_cursor_events(ignore).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>) -> Result<(), String> {
     state.reset().map_err(|e| e.to_string())
 }

@@ -50,6 +50,7 @@ pub fn run() {
         })
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
+            commands::general::set_ignore_cursor,
             commands::general::fomi_reset,
             commands::general::fomi_think,
             commands::general::get_personalities,

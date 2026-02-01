@@ -21,6 +21,10 @@ let currentPersonality = 'standard';
 ui.preloadImages();
 
 
+characterContainer.addEventListener('mouseenter', async () => {
+    await api.setIgnoreCursor(false);
+});
+
 characterContainer.addEventListener('contextmenu', (event) => {
     event.preventDefault();
 
@@ -123,6 +127,10 @@ document.addEventListener('mousemove', (event) => {
 document.addEventListener('mouseup', async (event) => {
     isDragging = false;
     characterContainer.style.cursor = "grab";
+});
+
+characterContainer.addEventListener('mouseleave', async () => {
+  await api.setIgnoreCursor(true);
 });
 
 

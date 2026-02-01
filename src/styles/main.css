@@ -43,7 +43,7 @@ html, body {
   max-height: 90vh;
   object-fit: contain;
   transition: transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94); 
-  pointer-events: auto;
+  pointer-events: auto !important;
   -webkit-user-drag: none;
   cursor: grab;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.3));
@@ -58,9 +58,9 @@ html, body {
 
 #subtitle-container {
   position: absolute;
-  bottom: 100%;
+  top: 60%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%, -0%);
   width: auto;
   max-width: 80%;
   text-align: center;

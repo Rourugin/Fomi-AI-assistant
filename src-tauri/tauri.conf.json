@@ -14,7 +14,7 @@
         "title": "Fomi AI",
         "width": 600,
         "height": 800,
-        "fullscreen": true,
+        "maximized": true,
         "resizable": false,
         "decorations": false,
         "transparent": true,
