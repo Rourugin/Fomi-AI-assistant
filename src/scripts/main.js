@@ -15,6 +15,7 @@ const dashCloseBtn = document.getElementById('btn-close-dash');
 
 let isThink = false;
 let isDragging = false;
+let isInterfaceLocked = false;
 let offsetX = 0;
 let offsetY = 0;
 let currentPersonality = 'standard';
@@ -53,9 +54,11 @@ document.addEventListener('mousedown', (event) => {
 document.getElementById('menu-open-dashboard').addEventListener('click', async () => {
   const avatar = document.getElementById('fomi-avatar');
   const avatarRect = avatar.getBoundingClientRect();
+  isInterfaceLocked = true;
 
   dashboard.classList.remove('hidden');
   await loadPersonalities();
+  await api.setIgnoreCursor(false)
 
   positionDashboardNearAvatar(avatarRect);
   contextMenu.classList.add('hidden');
@@ -83,6 +86,7 @@ document.getElementById('menu-close').addEventListener('click', async () => {
 });
 
 dashCloseBtn.addEventListener('click', async () => {
+  isInterfaceLocked = false;
   dashboard.classList.add('hidden');
 });
 
@@ -129,8 +133,19 @@ document.addEventListener('mouseup', async (event) => {
     characterContainer.style.cursor = "grab";
 });
 
-characterContainer.addEventListener('mouseleave', async () => {
-  await api.setIgnoreCursor(true);
+characterContainer.addEventListener('mouseleave', async (event) => {
+  if (isInterfaceLocked == true) {
+    return;
+  }
+
+  if (event.relatedTarget && (event.relatedTarget.closest('#context-menu') || event.relatedTarget.closest('#dashboard-layer'))) {
+    return;
+  }
+  await api.setIgnoreCursor(true)
+});
+
+window.addEventListener('focus', async () => {
+  await api.setIgnoreCursor(false);
 });
 
 
