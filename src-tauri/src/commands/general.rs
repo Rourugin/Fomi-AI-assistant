@@ -1,11 +1,11 @@
-use std::{fmt::format, fs};
-use tauri::{Manager, utils::{config::AppImageConfig, resources}};
-use crate::session_manager;
+use std::{fmt::format, fs, sync::Mutex};
+use tauri::{Manager, State, utils::{config::AppImageConfig, resources}, webview::cookie::time::format_description::modifier::Ignore};
+use crate::{session_manager};
 
 
 #[tauri::command]
 pub async fn set_ignore_cursor(window: tauri::Window, ignore: bool) -> Result<(), String> {
-  window .set_ignore_cursor_events(ignore).map_err(|e| e.to_string())
+  window.set_ignore_cursor_events(ignore).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

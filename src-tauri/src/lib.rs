@@ -1,4 +1,4 @@
-use std::{env, fs};
+use std::{env, fs, sync::{Arc, Mutex}};
 use tauri::Manager;
 pub mod plugin_system;
 mod session_manager;

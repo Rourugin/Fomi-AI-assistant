@@ -7,6 +7,7 @@ const { getCurrentWindow } = window.__TAURI__.window;
 const characterContainer = document.getElementById('character-container');
 const contextMenu = document.getElementById('context-menu');
 const dashboard = document.getElementById('dashboard-layer');
+const avatar = document.getElementById('fomi-avatar');
 
 const dashInput = document.getElementById('dashboard-input');
 const personalityContainer = document.getElementById('personality-container');
@@ -19,8 +20,11 @@ let isInterfaceLocked = false;
 let offsetX = 0;
 let offsetY = 0;
 let currentPersonality = 'standard';
-ui.preloadImages();
 
+
+window.addEventListener('DOMContentLoaded', () => {
+  ui.preloadImages();
+});
 
 characterContainer.addEventListener('mouseenter', async () => {
     await api.setIgnoreCursor(false);
@@ -36,7 +40,7 @@ characterContainer.addEventListener('contextmenu', (event) => {
   }
 });
 
-characterContainer.addEventListener('mousedown', (event) => {
+characterContainer.addEventListener('mousedown', async (event) => {
   isDragging = true;
   characterContainer.style.cursor = "grabbing";
 
@@ -52,13 +56,12 @@ document.addEventListener('mousedown', (event) => {
 });
 
 document.getElementById('menu-open-dashboard').addEventListener('click', async () => {
-  const avatar = document.getElementById('fomi-avatar');
   const avatarRect = avatar.getBoundingClientRect();
   isInterfaceLocked = true;
 
   dashboard.classList.remove('hidden');
   await loadPersonalities();
-  await api.setIgnoreCursor(false)
+  await api.setIgnoreCursor(false);
 
   positionDashboardNearAvatar(avatarRect);
   contextMenu.classList.add('hidden');
@@ -92,7 +95,9 @@ dashCloseBtn.addEventListener('click', async () => {
 
 dashSendBtn.addEventListener('click', async () => {
   const text = dashInput.value;
-  if (!text) return;
+  if (!text) {
+    return
+  };
 
   dashInput.value = '';
   dashboard.classList.add('hidden');
@@ -129,12 +134,12 @@ document.addEventListener('mousemove', (event) => {
 });
 
 document.addEventListener('mouseup', async (event) => {
-    isDragging = false;
-    characterContainer.style.cursor = "grab";
+  isDragging = false;
+  characterContainer.style.cursor = "grab";
 });
 
 characterContainer.addEventListener('mouseleave', async (event) => {
-  if (isInterfaceLocked == true) {
+  if (isInterfaceLocked) {
     return;
   }
 
@@ -150,7 +155,9 @@ window.addEventListener('focus', async () => {
 
 
 async function thinkInput(text) {
-  if (isThink) return;
+  if (isThink) {
+    return
+  };
   isThink = true;
   ui.setAvatarState('think');
 
