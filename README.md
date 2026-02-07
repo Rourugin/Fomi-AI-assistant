@@ -27,10 +27,11 @@
 **Fomi** is a local assistant built to respect your privacy. Unlike cloud AI (ChatGPT, Claude), Fomi runs **entirely on your hardware**. It uses a plugin system to interact with your OS, allowing it to perform real tasks, not just chat.
 
 ### 🌟 Key Features
-* 🧠 **Local Brain**: Powered by `Llama-3.2-3B` (GGUF), running on CPU.
+* 🧠 **Local Brain**: Powered by `Llama-3.2-3B` (GGUF), running entirely on your CPU.
+* 🗄️ **Long-term Memory (RAG)**: Uses an embedded **LanceDB** vector store to remember past conversations and user-provided documents.
+* ⚡ **Fast Embeddings**: Dedicated `MiniLM` model for instant semantic search without bloating LLM context.
 * 🔌 **Plugin System**: Modular architecture using `Mutex` for thread-safe management.
-* 💾 **Persistence**: Remembers your settings and active plugins across restarts.
-* 🛡️ **Privacy First**: Zero data leaves your machine.
+* 🛡️ **Privacy First**: Zero data leaves your machine. Your thoughts and memories stay offline.
 
 ---
 
@@ -53,12 +54,24 @@ To keep development active without selling user data, we plan two revenue stream
 
 ## 🏗️ Architecture Status
 
-| Module | Status | Tech Stack |
-| :--- | :--- | :--- |
-| **Core Framework** | ✅ Stable | Rust, Tauri 2.0 |
-| **Plugin Manager** | ✅ Stable | File System, Serde JSON |
-| **AI Engine**      | ✅ Stable | `llama-cpp-2`, GGUF |
-| **UI / Frontend**  | 🚧 In Progress | HTML/JS (Later React/Svelte) |
+| Module            | Status         | Tech Stack                    |
+| :---------------- | :------------- | :---------------------------- |
+| **Core Framework**| ✅ Stable      | Rust, Tauri 2.0               |
+| **Plugin Manager**| ✅ Stable      | File System, Serde JSON       |
+| **AI Engine**     | ✅ Stable      | `llama-cpp-2` (Llama 3.2 3B)  |
+| **Vector Memory** | 🚧 In Progress | **LanceDB**, `all-MiniLM-L6-v2`|
+| **UI / Frontend** | 🚧 In Progress | HTML/JS (Later React/Svelte)  |
+
+---
+
+## 🏗️ Memory System Logic (RAG)
+
+Our implementation of RAG (Retrieval-Augmented Generation) follows a specific local-first pipeline:
+
+1.  **Ingestion**: When a message is processed, it's passed through a lightweight Embedding Model.
+2.  **Storage**: The resulting vector is stored in **LanceDB** with metadata (timestamp, session ID).
+3.  **Retrieval**: Before generating a response, Fomi searches the vector DB for contextually similar past interactions.
+4.  **Augmentation**: Relevant "memories" are injected into the LLM system prompt, giving Fomi a persistent personality and knowledge base.
 
 ---
 
