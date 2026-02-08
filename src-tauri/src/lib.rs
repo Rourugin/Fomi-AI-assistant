@@ -3,6 +3,7 @@ use tauri::Manager;
 pub mod plugin_system;
 mod session_manager;
 pub mod ai_engine;
+pub mod memory;
 mod commands;
 
 
