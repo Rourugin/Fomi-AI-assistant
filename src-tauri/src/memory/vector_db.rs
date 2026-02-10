@@ -27,7 +27,7 @@ pub struct FomiVectorStore {
 
 impl FomiVectorStore {
     pub async fn new(store_path: PathBuf) -> Result<FomiVectorStore, Box<dyn std::error::Error>> {
-        let db = lancedb::connect(store_path.to_str()?).execute().await?;
+        let db = lancedb::connect(store_path.to_str().ok_or("Invalid path")?).execute().await?;
         let table_name = "memories";
 
         let table = if !db.table_names().execute().await?.contains(&table_name.to_string()) {
@@ -51,12 +51,12 @@ impl FomiVectorStore {
         })
     }
 
-    pub async fn add(&self, id: Uuid, test: &str, vector:Vec<f32>) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn add(&self, id: Uuid, text: &str, vector:Vec<f32>, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let created_at = Utc::now().timestamp();
 
         let id_array = StringArray::from(vec![id.to_string()]);
         let text_array = StringArray::from(vec![text]);
-        let source_array = StringArray::from(vec!["user"]);
+        let source_array = StringArray::from(vec![source]);
         let created_at_array = Int64Array::from(vec![created_at]);
         let value_array = Float32Array::from(vector);
         let vector_array = FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
@@ -89,7 +89,7 @@ impl FomiVectorStore {
         Ok(())
     }
 
-    pub async fn search(&self, query_vec: Vec<f32>, limit: usize) -> Result<Vec<Uuid, String>, Box<dyn std::error::Error>> {
+    pub async fn search(&self, query_vec: Vec<f32>, limit: usize) -> Result<Vec<(Uuid, String)>, Box<dyn std::error::Error>> {
         let results_stream = self.table
             .query()
             .nearest_to(query_vec)?
