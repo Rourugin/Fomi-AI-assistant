@@ -49,7 +49,7 @@ pub struct AiSession {
 }
 
 impl AiSession {
-    pub fn infer(&mut self, text: &str, personality_prompt: &str) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn infer(&mut self, text: &str) -> Result<String, Box<dyn std::error::Error>> {
         let mut batch = LlamaBatch::new(2048, 1);
         self.with_mut(|fields| {
             let add_bos = if fields.history.is_empty() {
@@ -58,15 +58,8 @@ impl AiSession {
                 AddBos::Never
             };
 
-            let mut prompt = String::new();
-            prompt.push_str("<|begin_of_text|><|start_header_id|>");
-            prompt.push_str(personality_prompt);
-            prompt.push_str("<|end_header_id|>\n\n");
-            prompt.push_str(text);
-            prompt.push_str("<|eot_id|>");
-
             let new_tokens = fields.model_handle
-                .str_to_token(&prompt, add_bos)
+                .str_to_token(&text, add_bos)
                 .map_err(|e| format!("Tokenize error: {}", e))?;
             batch.clear();
             let last_index = new_tokens.len().saturating_sub(1);
