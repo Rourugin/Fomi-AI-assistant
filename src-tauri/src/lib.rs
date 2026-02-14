@@ -1,4 +1,4 @@
-use std::{env, fs, sync::{Arc, Mutex}};
+use std::{env, fs};
 use tauri::Manager;
 pub mod plugin_system;
 mod session_manager;
@@ -24,13 +24,30 @@ pub fn run() {
                         .expect("Failed to resolve standard personality path");
                     let initial_prompt = fs::read_to_string(&personality_path)
                         .unwrap_or_else(|_| "You are Fomi, a helpful assistant.".to_string());
-                    match session_manager::SessionManager::new(core, &initial_prompt) {
-                        Ok(manager) => {
-                            println!("Session started");
-                            app.manage(manager);
+                    let app_data_dir = app.path().app_data_dir().unwrap();
+                    let db_path = app_data_dir.join("memory_db");
+                    let embedder_path = app_data_dir.join("models").join("all-minilm-l6-v2");
+
+                    let memory_system_result = tauri::async_runtime::block_on(async {
+                        std::fs::create_dir_all(&embedder_path).ok(); 
+                        memory::MemorySystem::new(embedder_path, db_path).await
+                    });
+
+                    match memory_system_result {
+                        Ok(memory) => {
+                            match session_manager::SessionManager::new(core, &initial_prompt, memory) {
+                                Ok(manager) => {
+                                    println!("Session started");
+                                    app.manage(manager);
+                                }
+                                Err(e) => {
+                                    println!("Session error: {}", e);
+                                }
+                            }
                         }
                         Err(e) => {
-                            println!("Session error: {}", e);
+                            eprintln!("Failed to init memory: {}", e);
+                            panic!("Memory init failed: {}", e);
                         }
                     }
                 }

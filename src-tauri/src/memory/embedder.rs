@@ -1,6 +1,5 @@
 use fastembed::{EmbeddingModel, InitOptions, TextEmbedding};
-use llama_cpp_2::model;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 
 pub struct FomiEmbedder {
@@ -19,7 +18,7 @@ impl FomiEmbedder {
         })
     }
 
-    pub fn embed(&self, text: &str) -> Result<Vec<f32>, Box<dyn std::error::Error>> {
+    pub fn embed(&mut self, text: &str) -> Result<Vec<f32>, Box<dyn std::error::Error>> {
         let embeddings = self.model.embed(vec![text], None)?;
 
         Ok(embeddings[0].clone())

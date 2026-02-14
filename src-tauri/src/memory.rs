@@ -1,11 +1,11 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Mutex};
 use uuid::Uuid;
 pub mod vector_db;
 pub mod embedder;
 
 
 pub struct MemorySystem {
-    embedder: embedder::FomiEmbedder,
+    embedder: Mutex<embedder::FomiEmbedder>,
     store: vector_db::FomiVectorStore,
 }
 
@@ -15,21 +15,27 @@ impl MemorySystem {
         let db = vector_db::FomiVectorStore::new(db_path).await?;
 
         Ok(MemorySystem { 
-            embedder, 
+            embedder: Mutex::new(embedder), 
             store: db, 
         })
     }
 
     pub async fn ingest(&self, text: &str, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let id = Uuid::new_v4();
-        let vector = self.embedder.embed(text)?;
+        let vector = {
+            let mut embedder_guard = self.embedder.lock().map_err(|_| "Mutex poison error")?;
+            embedder_guard.embed(text)?
+        };
         self.store.add(id, text, vector, source).await?;
 
         Ok(())
     }
 
     pub async fn retrieve(&self, text: &str, limit: usize) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-        let vector = self.embedder.embed(text)?;
+        let vector = {
+            let mut embedder_guard = self.embedder.lock().map_err(|_| "Mutex poison error")?;
+            embedder_guard.embed(text)?
+        };
         let results = self.store.search(vector, limit).await?;
         let texts: Vec<String> = results.into_iter().map(|(_id, text)| text).collect();
 

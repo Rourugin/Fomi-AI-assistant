@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[allow(dead_code)]
-enum FileAccessLevel {
+pub enum FileAccessLevel {
     ReadOnly,
     ReadWrite,
     Execute,
@@ -17,7 +17,7 @@ enum FileAccessLevel {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[allow(dead_code)]
-enum NetworkAccessLevel {
+pub enum NetworkAccessLevel {
     LocalOnly,
     SpecificDomains,
     FullInternet,
@@ -25,7 +25,7 @@ enum NetworkAccessLevel {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[allow(dead_code)]
-enum SystemControl {
+pub enum SystemControl {
     ProcessManagement,
     WindowControl,
     PowerManagement,
@@ -36,7 +36,7 @@ enum SystemControl {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[allow(dead_code)]
-enum PermissionStatus {
+pub enum PermissionStatus {
     Granted,
     Denied,
     NotDecided,
@@ -248,7 +248,7 @@ impl PermissionChecker {
 
     fn is_dangerous_permission(&self, permission: &Permission) -> bool {
         match permission {
-            Permission::FileSystem {path, access_level} => {
+            Permission::FileSystem {path, access_level: _} => {
                 let path_str = path.to_string_lossy().to_string();
                 self.system_constraints.denied_paths.iter().any(|denied|path_str.contains(denied))
             }
@@ -347,7 +347,7 @@ impl PermissionChecker {
         }
     }
 
-    pub(crate) fn request_user_approval(&self, plugin_id: &Uuid, permission: &Permission) -> PermissionStatus {
+    fn request_user_approval(&self, plugin_id: &Uuid, permission: &Permission) -> PermissionStatus {
         PermissionStatus::NotDecided
     }
 

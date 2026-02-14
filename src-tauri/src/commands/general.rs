@@ -1,5 +1,5 @@
-use std::{fmt::format, fs, sync::Mutex};
-use tauri::{Manager, State, utils::{config::AppImageConfig, resources}, webview::cookie::time::format_description::modifier::Ignore};
+use std::fs;
+use tauri::Manager;
 use crate::{session_manager};
 
 
@@ -15,7 +15,7 @@ pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>
 
 #[tauri::command]
 pub async fn fomi_think(state: tauri::State<'_, session_manager::SessionManager>, text: String) -> Result<String, String> {
-    state.think(&text).map_err(|e| e.to_string())
+    state.think(&text).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]

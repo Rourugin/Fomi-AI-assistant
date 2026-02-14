@@ -1,9 +1,8 @@
-use arrow_array::{FixedSizeListArray, Float32Array, Int64Array, RecordBatch, StringArray, StringArrayType, types::Float32Type};
-use lancedb::{Table, connection::Connection, query::{ExecutableQuery, QueryBase}};
+use arrow_array::{FixedSizeListArray, Float32Array, Int64Array, RecordBatch, StringArray, RecordBatchIterator};
+use lancedb::{Table, query::{ExecutableQuery, QueryBase}};
 use arrow_schema::{DataType, Field, Schema};
 use std::{path::PathBuf, sync::Arc};
 use futures::TryStreamExt;
-use serde_json::to_vec;
 use chrono::Utc;
 use uuid::Uuid;
 
@@ -59,9 +58,12 @@ impl FomiVectorStore {
         let source_array = StringArray::from(vec![source]);
         let created_at_array = Int64Array::from(vec![created_at]);
         let value_array = Float32Array::from(vector);
-        let vector_array = FixedSizeListArray::from_iter_primitive::<Float32Type, _, _>(
-            vec![Some(value_array.values().to_vec())],
-            EMBEDDING_DIM
+        let list_field = Arc::new(Field::new("item", DataType::Float32, true));
+        let vector_array = FixedSizeListArray::new(
+            list_field, 
+            EMBEDDING_DIM, 
+            Arc::new(value_array), 
+            None
         );
 
         let schema = Arc::new(Schema::new(vec![
@@ -75,7 +77,7 @@ impl FomiVectorStore {
             Field::new("source", DataType::Utf8, false),
         ]));
 
-        let batch = RecordBatch::try_new(schema, 
+        let batch = RecordBatch::try_new(schema.clone(),
             vec![
                 Arc::new(id_array),
                 Arc::new(text_array),
@@ -85,7 +87,8 @@ impl FomiVectorStore {
             ]
         )?;
 
-        self.table.add(Box::new(vec![batch].into_iter())).execute().await?;
+        let batch_iter = RecordBatchIterator::new(vec![Ok(batch)], schema.clone());
+        self.table.add(Box::new(batch_iter)).execute().await?;
         Ok(())
     }
 

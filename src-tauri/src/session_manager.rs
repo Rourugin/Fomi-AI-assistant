@@ -41,19 +41,28 @@ impl SessionManager {
     }
 
     pub async fn think(&self, text: &str) -> Result<String, String> {
-        let mut guard = self.session.lock().unwrap();
-        let mut prompt_guard = self.current_system_prompt.lock().unwrap();
-        let mut answer = "Fomi is asleep! you need to wake her up".to_string();
-        answer = "".to_string();
-        answer.push_str("<|begin_of_text|><|start_header_id|>");
-        answer.push_str(&prompt_guard);
-        answer.push_str("You have the following information from your long-term memory: ");
-        answer.push_str("<|end_header_id|>\n\n");
-        answer.push_str(text);
-        answer.push_str("<|eot_id|>");
-        if let Some(session) = guard.as_mut() {
-            answer = session.infer(text).map_err(|e| format!("{}", e))?;
-        }
+        let system_prompt = self.current_system_prompt.lock().unwrap().clone();
+        let memories = self.memory.retrieve(text, 3).await.unwrap_or_default();
+        let context_block = if memories.is_empty() {
+            String::new()
+        } else {
+            format!("You have the following information from your long-term memory:\n{}\n", memories.join("\n"))
+        };
+
+        let full_prompt = format!(
+            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{}{}<|eot_id|>\n\
+            <|start_header_id|>user<|end_header_id|>\n{}<|eot_id|>\n\
+            <|start_header_id|>assistant<|end_header_id|>\n",
+            system_prompt, context_block, text
+        );
+
+        let session_opt = self.session.lock().unwrap().take();
+        let mut session = session_opt.ok_or_else(|| "No active session".to_string())?;
+
+        let answer = session.infer(&full_prompt).map_err(|e| format!("{}", e))?;
+
+        *self.session.lock().unwrap() = Some(session);
+
         Ok(answer)
     }
 }
