@@ -42,7 +42,7 @@ impl SessionManager {
 
     pub async fn think(&self, text: &str) -> Result<String, String> {
         let system_prompt = self.current_system_prompt.lock().unwrap().clone();
-        let memories = self.memory.retrieve(text, 3).await.unwrap_or_default();
+        let memories = self.memory.retrieve(text, 3).await.map_err(|e| e.to_string())?;
         let context_block = if memories.is_empty() {
             String::new()
         } else {
@@ -62,6 +62,14 @@ impl SessionManager {
         let answer = session.infer(&full_prompt).map_err(|e| format!("{}", e))?;
 
         *self.session.lock().unwrap() = Some(session);
+
+        if let Err(e) = self.memory.ingest(text, "user").await {
+            eprintln!("Failed to save user memory: {}", e);
+        }
+
+        if let Err(e) = self.memory.ingest(&answer, "assistant").await {
+            eprintln!("Failed to save assistant memory: {}", e);
+        }
 
         Ok(answer)
     }
