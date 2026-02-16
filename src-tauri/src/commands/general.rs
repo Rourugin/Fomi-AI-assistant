@@ -10,7 +10,7 @@ pub async fn set_ignore_cursor(window: tauri::Window, ignore: bool) -> Result<()
 
 #[tauri::command]
 pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>) -> Result<(), String> {
-    state.reset().map_err(|e| e.to_string())
+    state.reset().await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]

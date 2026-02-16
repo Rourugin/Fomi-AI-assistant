@@ -21,7 +21,9 @@ impl SessionManager {
         })
     }
 
-    pub fn reset(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn reset(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.memory.wipe_memory().await?;
+
         let prompt_guard = self.current_system_prompt.lock().unwrap();
         let current_prompt = prompt_guard.clone();
         drop(prompt_guard);
@@ -29,6 +31,7 @@ impl SessionManager {
         let new_session = self.core.start_session(&current_prompt)?;
         let mut session_guard = self.session.lock().unwrap();
         *session_guard = Some(new_session);
+
         Ok(())
     }
 
@@ -37,7 +40,8 @@ impl SessionManager {
         *prompt_guard = new_prompt.to_string();
         drop(prompt_guard);
 
-        self.reset()
+        self.reset();
+        Ok(())
     }
 
     pub async fn think(&self, text: &str) -> Result<String, String> {

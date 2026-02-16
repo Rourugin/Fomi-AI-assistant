@@ -128,4 +128,10 @@ impl FomiVectorStore {
 
         Ok(found_memories)
     }
+
+    pub async fn wipe(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.table.delete("true").await?;
+
+        Ok(())
+    }
 }

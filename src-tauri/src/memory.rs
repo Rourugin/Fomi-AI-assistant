@@ -20,13 +20,24 @@ impl MemorySystem {
         })
     }
 
+    fn split_text(&self, text: &str) -> Vec<String> {
+        text.split('\n')
+            .filter(|s| !s.trim().is_empty())
+            .map(|s| s.to_string())
+            .collect()
+    }
+
     pub async fn ingest(&self, text: &str, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let id = Uuid::new_v4();
         let vector = {
             let mut embedder_guard = self.embedder.lock().map_err(|_| "Mutex poison error")?;
             embedder_guard.embed(text)?
         };
-        self.store.add(id, text, vector, source).await?;
+        let chunks = self.split_text(text);
+
+        for chunk in chunks {
+            self.store.add(id, &chunk, vector.clone(), source).await?;
+        }
 
         Ok(())
     }
@@ -40,5 +51,9 @@ impl MemorySystem {
         let texts: Vec<String> = results.into_iter().map(|(_id, text)| text).collect();
 
         Ok(texts)
+    }
+
+    pub async fn wipe_memory(&self) -> Result<(), Box<dyn std::error::Error>> {
+        self.store.wipe().await
     }
 }
