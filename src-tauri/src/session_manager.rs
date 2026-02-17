@@ -21,26 +21,16 @@ impl SessionManager {
         })
     }
 
-    pub async fn reset(&self) -> Result<(), Box<dyn std::error::Error>> {
-        self.memory.wipe_memory().await?;
-
-        let prompt_guard = self.current_system_prompt.lock().unwrap();
-        let current_prompt = prompt_guard.clone();
-        drop(prompt_guard);
-
-        let new_session = self.core.start_session(&current_prompt)?;
-        let mut session_guard = self.session.lock().unwrap();
-        *session_guard = Some(new_session);
-
+    pub async fn reset(&self, wipe_memory: bool) -> Result<(), Box<dyn std::error::Error>> {
+        if wipe_memory {
+            self.memory.wipe_memory().await?;
+        }
+        self.restart_session_internal(None)?;
         Ok(())
     }
 
     pub fn update_personality(&self, new_prompt: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let mut prompt_guard = self.current_system_prompt.lock().unwrap();
-        *prompt_guard = new_prompt.to_string();
-        drop(prompt_guard);
-
-        self.reset();
+        self.restart_session_internal(Some(new_prompt))?;
         Ok(())
     }
 
@@ -76,5 +66,23 @@ impl SessionManager {
         }
 
         Ok(answer)
+    }
+
+    fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
+        let new_current_prompt = {
+            let mut prompt_guard = self.current_system_prompt.lock().unwrap();
+            
+            if let Some(new_p) = new_prompt {
+                *prompt_guard = new_p.to_string();
+            }
+            
+            prompt_guard.clone()
+        };
+
+        let new_session = self.core.start_session(&new_current_prompt)?;
+        let mut session_guard = self.session.lock().unwrap();
+        *session_guard = Some(new_session);
+
+        Ok(())
     }
 }

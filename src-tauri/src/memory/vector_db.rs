@@ -5,6 +5,7 @@ use std::{path::PathBuf, sync::Arc};
 use futures::TryStreamExt;
 use chrono::Utc;
 use uuid::Uuid;
+use sha256;
 
 
 const EMBEDDING_DIM: i32 = 384;
@@ -52,10 +53,12 @@ impl FomiVectorStore {
 
     pub async fn add(&self, id: Uuid, text: &str, vector:Vec<f32>, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let created_at = Utc::now().timestamp();
+        let current_hash = sha256::digest(text.to_string());
 
         let id_array = StringArray::from(vec![id.to_string()]);
         let text_array = StringArray::from(vec![text]);
         let source_array = StringArray::from(vec![source]);
+        let hash_array = StringArray::from(vec![current_hash]);
         let created_at_array = Int64Array::from(vec![created_at]);
         let value_array = Float32Array::from(vector);
         let list_field = Arc::new(Field::new("item", DataType::Float32, true));
@@ -73,6 +76,7 @@ impl FomiVectorStore {
                 Arc::new(Field::new("item", DataType::Float32, true)),
                 EMBEDDING_DIM
             ), false),
+            Field::new("hash", DataType::Utf8, false),
             Field::new("created_at", DataType::Int64, false),
             Field::new("source", DataType::Utf8, false),
         ]));
@@ -82,6 +86,7 @@ impl FomiVectorStore {
                 Arc::new(id_array),
                 Arc::new(text_array),
                 Arc::new(vector_array),
+                Arc::new(hash_array),
                 Arc::new(created_at_array),
                 Arc::new(source_array),
             ]
