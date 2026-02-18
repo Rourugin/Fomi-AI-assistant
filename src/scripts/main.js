@@ -70,7 +70,8 @@ document.getElementById('menu-open-dashboard').addEventListener('click', async (
 document.getElementById('menu-reset').addEventListener('click', async () => {
   contextMenu.classList.add('hidden');
   try {
-    await api.fomiReset();
+    let wipe = await askUserToWipeMemory();
+    await api.fomiReset(wipe);
     ui.showSubtitle("Memory was resetted");
   } catch (e) {
     console.error(e);
@@ -112,11 +113,13 @@ dashInput.addEventListener('keydown', (event) => {
 
 personalityContainer.addEventListener('click', async (event) => {
   const clickedBtn = event.target.closest('.personality-btn');
+  let wipe = await askUserToWipeMemory();
+
   if (!clickedBtn) {
     return;
   }
   currentPersonality = clickedBtn.title;
-  await api.setPersonality(currentPersonality);
+  await api.setPersonality(currentPersonality, wipe);
   loadPersonalities();
 });
 
@@ -186,6 +189,38 @@ async function loadPersonalities() {
   names.unshift('standard');
   await ui.showPersonalities(names, currentPersonality);
   dashboard.style.cursor = "default";
+}
+
+async function askUserToWipeMemory() {
+  const modal = document.getElementById('confirmation-modal');
+  const yesBtn = document.getElementById('btn-confirm-yes');
+  const noBtn = document.getElementById('btn-confirm-no');
+
+  modal.classList.remove('hidden');
+  await api.setIgnoreCursor(false);
+
+  return new Promise((resolve) => {
+      const cleanup = async (result) => {
+      modal.classList.add('hidden');
+      await api.setIgnoreCursor(true);
+
+      yesBtn.removeEventListener('click', onYes);
+      noBtn.removeEventListener('click', onNo);
+
+      resolve(result);
+    };
+
+    function onYes() {
+      cleanup(true);
+    }
+
+    function onNo() {
+      cleanup(false);
+    }
+
+    yesBtn.addEventListener('click', onYes);
+    noBtn.addEventListener('click', onNo);
+  });
 }
 
 function positionDashboardNearAvatar(avatarRect) {

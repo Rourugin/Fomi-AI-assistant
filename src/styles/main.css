@@ -347,4 +347,90 @@ button:active {
   transform: scale(0.95);
 }
 
+#confirmation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+
+#confirmation-modal.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.modal-content {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 0 20px var(--accent-glow);
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#confirmation-modal.hidden .modal-content {
+  transform: scale(0.9);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: var(--accent);
+  font-family: var(--font-main);
+}
+
+.modal-content p {
+  color: var(--text-secondary);
+  margin-bottom: 25px;
+  font-size: 1.1em;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-weight: bold;
+  transition: all 0.2s;
+  border: none;
+}
+
+#btn-confirm-no {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-glass);
+}
+#btn-confirm-no:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+#btn-confirm-yes {
+  background: rgba(243, 139, 168, 0.2);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+#btn-confirm-yes:hover {
+  background: var(--danger);
+  color: white;
+  box-shadow: 0 0 15px rgba(243, 139, 168, 0.4);
+}
+
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
