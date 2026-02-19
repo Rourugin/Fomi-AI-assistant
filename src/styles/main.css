@@ -359,6 +359,7 @@ button:active {
   z-index: 1000;
   opacity: 1;
   transition: opacity 0.3s ease;
+  pointer-events: auto !important;
 }
 
 #confirmation-modal.hidden {
@@ -416,7 +417,9 @@ button:active {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   border: 1px solid var(--border-glass);
+  pointer-events: auto !important;
 }
+
 #btn-confirm-no:hover {
   background: rgba(255, 255, 255, 0.2);
 }
@@ -425,6 +428,7 @@ button:active {
   background: rgba(243, 139, 168, 0.2);
   color: var(--danger);
   border: 1px solid var(--danger);
+  pointer-events: auto !important;
 }
 
 #btn-confirm-yes:hover {
