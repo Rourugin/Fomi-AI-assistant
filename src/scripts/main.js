@@ -70,7 +70,7 @@ document.getElementById('menu-open-dashboard').addEventListener('click', async (
 document.getElementById('menu-reset').addEventListener('click', async () => {
   contextMenu.classList.add('hidden');
   try {
-    let wipe = await askUserToWipeMemory();
+    const wipe = await askUserToWipeMemory();
     await api.fomiReset(wipe);
     ui.showSubtitle("Memory was resetted");
   } catch (e) {
@@ -113,7 +113,7 @@ dashInput.addEventListener('keydown', (event) => {
 
 personalityContainer.addEventListener('click', async (event) => {
   const clickedBtn = event.target.closest('.personality-btn');
-  let wipe = await askUserToWipeMemory();
+  const wipe = await askUserToWipeMemory();
 
   if (!clickedBtn) {
     return;
@@ -199,27 +199,24 @@ async function askUserToWipeMemory() {
   modal.classList.remove('hidden');
   await api.setIgnoreCursor(false);
 
-  return new Promise((resolve) => {
-      const cleanup = async (result) => {
+  return new Promise(async (resolve) => {
+    const cleanup = () => {
       modal.classList.add('hidden');
-      await api.setIgnoreCursor(true);
-
-      yesBtn.removeEventListener('click', onYes);
-      noBtn.removeEventListener('click', onNo);
-
-      resolve(result);
+      yesBtn.replaceWith(yesBtn.cloneNode(true));
+      noBtn.replaceWith(noBtn.cloneNode(true));
     };
 
-    function onYes() {
-      cleanup(true);
-    }
+    document.getElementById('btn-confirm-yes').onclick = async () => {
+      modal.classList.add('hidden');
+      await api.setIgnoreCursor(true);
+      resolve(true);
+    };
 
-    function onNo() {
-      cleanup(false);
-    }
-
-    yesBtn.addEventListener('click', onYes);
-    noBtn.addEventListener('click', onNo);
+    document.getElementById('btn-confirm-no').onclick = async () => {
+      modal.classList.add('hidden');
+      await api.setIgnoreCursor(true);
+      resolve(false);
+    };
   });
 }
 

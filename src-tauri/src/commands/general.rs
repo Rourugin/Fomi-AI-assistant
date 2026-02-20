@@ -9,8 +9,8 @@ pub async fn set_ignore_cursor(window: tauri::Window, ignore: bool) -> Result<()
 }
 
 #[tauri::command]
-pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>, wipe_memory: bool) -> Result<(), String> {
-    state.reset(wipe_memory).await.map_err(|e| e.to_string())
+pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>, wipe: bool) -> Result<(), String> {
+    state.reset(wipe).await.map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -41,7 +41,7 @@ pub async fn get_personalities(app: tauri::AppHandle) -> Result<Vec<String>, Str
 }
 
 #[tauri::command]
-pub async fn set_personality(state: tauri::State<'_, session_manager::SessionManager>, app: tauri::AppHandle, name: String, wipe_memory: bool) -> Result<(), String> {
+pub async fn set_personality(state: tauri::State<'_, session_manager::SessionManager>, app: tauri::AppHandle, name: String, wipe: bool) -> Result<(), String> {
     let filename = format!("{}.md", name);
     let resource_dir = app.path().resolve("assets/personalities", tauri::path::BaseDirectory::Resource)
         .map_err(|e| e.to_string())?;
@@ -49,8 +49,8 @@ pub async fn set_personality(state: tauri::State<'_, session_manager::SessionMan
     let prompt_text = fs::read_to_string(file_path).map_err(|e| e.to_string())?;
 
     state.update_personality(&prompt_text).map_err(|e| e.to_string())?;
-    if wipe_memory {
-        state.reset(wipe_memory).await.map_err(|e| e.to_string())?;
+    if wipe {
+        state.reset(wipe).await.map_err(|e| e.to_string())?;
     }
     Ok(())
 }
