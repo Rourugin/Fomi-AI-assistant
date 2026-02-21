@@ -38,6 +38,7 @@ impl FomiVectorStore {
                     Arc::new(Field::new("item", DataType::Float32, true)),
                     EMBEDDING_DIM
                 ), false),
+                Field::new("hash", DataType::Utf8, false),
                 Field::new("created_at", DataType::Int64, false),
                 Field::new("source", DataType::Utf8, false),
             ]));
@@ -54,6 +55,20 @@ impl FomiVectorStore {
     pub async fn add(&self, id: Uuid, text: &str, vector:Vec<f32>, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let created_at = Utc::now().timestamp();
         let current_hash = sha256::digest(text.to_string());
+
+        let count_result: Vec<RecordBatch> = self.table
+            .query()
+            .only_if(format!("hash = '{}'", current_hash))
+            .limit(1)
+            .execute()
+            .await?
+            .try_collect::<Vec<RecordBatch>>()
+            .await?;
+
+        if !count_result.is_empty() && count_result[0].num_rows() > 0 {
+            println!("Skipping duplicate: {}", text.chars().take(20).collect::<String>());
+            return Ok(());
+        }
 
         let id_array = StringArray::from(vec![id.to_string()]);
         let text_array = StringArray::from(vec![text]);
@@ -136,7 +151,6 @@ impl FomiVectorStore {
 
     pub async fn wipe(&self) -> Result<(), Box<dyn std::error::Error>> {
         self.table.delete("true").await?;
-
         Ok(())
     }
 }
