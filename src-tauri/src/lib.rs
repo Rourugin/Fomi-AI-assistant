@@ -5,6 +5,7 @@ mod session_manager;
 pub mod ai_engine;
 pub mod memory;
 mod commands;
+mod settings;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -16,14 +17,24 @@ pub fn run() {
                 .parent()
                 .expect("Failed to get parent directory")
                 .join("models/model.gguf");
+            let app_config_dir = app.path().app_config_dir().unwrap();
+
+            if !app_config_dir.exists() {
+                std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
+            };
+
             match ai_engine::AiCore::new(model_path) {
                 Ok(core) => {
                     println!("AI is alive");
+                    let current_settings = settings::AppSettings::load_settings(app_config_dir.clone());
+                    let personality_filename = current_settings.active_personality;
                     let personality_path = app.path()
-                        .resolve("assets/personalities/standard.md", tauri::path::BaseDirectory::Resource)
-                        .expect("Failed to resolve standard personality path");
+                        .resolve("assets/personalities", tauri::path::BaseDirectory::Resource)
+                        .unwrap()
+                        .join(personality_filename);
                     let initial_prompt = fs::read_to_string(&personality_path)
                         .unwrap_or_else(|_| "You are Fomi, a helpful assistant.".to_string());
+
                     let app_data_dir = app.path().app_data_dir().unwrap();
                     let db_path = app_data_dir.join("memory_db");
                     let embedder_path = app_data_dir.join("models").join("all-minilm-l6-v2");
@@ -56,12 +67,6 @@ pub fn run() {
                 }
             }
 
-            let app_config_dir = app.path().app_config_dir().unwrap();
-
-            if !app_config_dir.exists() {
-                std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
-            };
-
             let manager = plugin_system::manager::PluginManager::new(app_config_dir);
             app.manage(manager);
             Ok(())
@@ -73,6 +78,7 @@ pub fn run() {
             commands::general::fomi_think,
             commands::general::get_personalities,
             commands::general::set_personality,
+            commands::general::get_active_personality,
             commands::plugins::get_active_plugins, 
             commands::plugins::install_plugin])
         .run(tauri::generate_context!())

@@ -19,7 +19,7 @@ let isDragging = false;
 let isInterfaceLocked = false;
 let offsetX = 0;
 let offsetY = 0;
-let currentPersonality = 'standard';
+let currentPersonality = await api.getActivePersonality();
 
 
 window.addEventListener('DOMContentLoaded', () => {
