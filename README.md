@@ -16,7 +16,9 @@
 
 *Your private, local, and extensible AI companion.*
 
-[Report Bug](https://github.com/Rourugin/Fomi-AI-assistant/issues) · [Request Feature](https://github.com/Rourugin/Fomi-AI-assistant/issues)
+[Explore the Docs](https://github.com/Rourugin/Fomi-AI-assistant) · [Report Bug](https://github.com/Rourugin/Fomi-AI-assistant/issues) · [Request Feature](https://github.com/Rourugin/Fomi-AI-assistant/issues)
+
+#### [Getting Started](#-getting-started) | [Contributing](./CONTRIBUTING.md) | [License](./LICENSE)
 
 </div>
 
@@ -32,6 +34,7 @@
 * ⚡ **Fast Embeddings**: Dedicated `MiniLM` model for instant semantic search without bloating LLM context.
 * 🔌 **Plugin System**: Modular architecture using `Mutex` for thread-safe management.
 * 🛡️ **Privacy First**: Zero data leaves your machine. Your thoughts and memories stay offline.
+* 🎭 **Dynamic Personalities**: Seamlessly switch between different character profiles (Standard, Shy, Sharp-tongue, etc.). Each personality now has its own unique system prompt and memory context.
 
 ---
 
@@ -102,8 +105,9 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
 
 - [x] **Phase 1: Foundation** (Architecture, File System, Configs)
 - [x] **Phase 2: The Brain** (Llama integration, Chat Loop) 
-- [ ] **Phase 3: The Body** (Connecting AI to Plugins)
-- [ ] **Phase 4: The Face** (Modern UI implementation)
+- [x] **Phase 3: Deep Roots** (Long-term Memory, Vector DB, Advanced Personalities)
+- [ ] **Phase 4: The Hub** (Dashboard overhaul, Multi-window UI)
+- [ ] **Phase 5: The Body** (Connecting AI to Plugins & System Controls)
 
 ---
 
