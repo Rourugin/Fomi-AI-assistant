@@ -112,7 +112,7 @@ impl FomiVectorStore {
         Ok(())
     }
 
-    pub async fn search(&self, query_vec: Vec<f32>, limit: usize) -> Result<Vec<(Uuid, String)>, Box<dyn std::error::Error>> {
+    pub async fn search(&self, query_vec: Vec<f32>, limit: usize) -> Result<Vec<(Uuid, String, f32)>, Box<dyn std::error::Error>> {
         let results_stream = self.table
             .query()
             .nearest_to(query_vec)?
@@ -136,12 +136,19 @@ impl FomiVectorStore {
                 .downcast_ref::<StringArray>()
                 .unwrap();
 
+            let distances = batch.column_by_name("_distance")
+                .ok_or("No distance column")?
+                .as_any()
+                .downcast_ref::<Float32Array>()
+                .unwrap();
+
             for i in 0..batch.num_rows() {
                 let id_str = ids.value(i);
                 let text_str = texts.value(i);
+                let distance = distances.value(i);
 
                 if let Ok(uuid) = Uuid::parse_str(id_str) {
-                    found_memories.push((uuid, text_str.to_string()));
+                    found_memories.push((uuid, text_str.to_string(), distance));
                 }
             }
         }

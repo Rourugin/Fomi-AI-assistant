@@ -4,6 +4,9 @@ pub mod vector_db;
 pub mod embedder;
 
 
+const SIMILARITY_THRESHOLD: f32 = 0.3;
+
+
 pub struct MemorySystem {
     embedder: Mutex<embedder::FomiEmbedder>,
     store: vector_db::FomiVectorStore,
@@ -48,7 +51,13 @@ impl MemorySystem {
             embedder_guard.embed(text)?
         };
         let results = self.store.search(vector, limit).await?;
-        let texts: Vec<String> = results.into_iter().map(|(_id, text)| text).collect();
+        let texts: Vec<String> = results
+            .into_iter()
+            .filter(|(_id, _text, distance)| {
+                *distance < SIMILARITY_THRESHOLD
+            })
+            .map(|(_id, text, _distance)| text)
+            .collect();
 
         Ok(texts)
     }
