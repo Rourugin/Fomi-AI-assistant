@@ -81,8 +81,7 @@ document.getElementById('menu-reset').addEventListener('click', async () => {
 
 document.getElementById('menu-close').addEventListener('click', async () => {
   try {
-    const appWindow = getCurrentWindow();
-    await appWindow.close();
+    await api.quitApp();
   } catch (e) {
     console.error(e);
     ui.showSubtitle("Cannot close the program. Check console");

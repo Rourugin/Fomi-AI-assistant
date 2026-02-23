@@ -69,3 +69,9 @@ pub async fn get_active_personality(app: tauri::AppHandle) -> Result<String, Str
     let pretty_filename = filename.replace(".md", "");
     Ok(pretty_filename)
 }
+
+#[tauri::command]
+pub async fn quit_app(app: tauri::AppHandle) -> Result<(), String> {
+    app.exit(0);
+    Ok(())
+}

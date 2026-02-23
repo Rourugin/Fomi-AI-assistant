@@ -79,6 +79,7 @@ pub fn run() {
             commands::general::get_personalities,
             commands::general::set_personality,
             commands::general::get_active_personality,
+            commands::general::quit_app,
             commands::plugins::get_active_plugins, 
             commands::plugins::install_plugin])
         .run(tauri::generate_context!())
