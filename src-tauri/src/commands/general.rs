@@ -71,6 +71,31 @@ pub async fn get_active_personality(app: tauri::AppHandle) -> Result<String, Str
 }
 
 #[tauri::command]
+pub async fn toggle_dashboard(app: tauri::AppHandle) -> Result<(), String> {
+    let dashboard_window = app.get_webview_window("dashboard");
+    let main_window = app.get_webview_window("main");
+
+    if let Some(window) = dashboard_window {
+        if window.is_visible().unwrap() {
+            window.hide().unwrap();
+            window.set_ignore_cursor_events(true).map_err(|e| e.to_string())?;
+            if let Some(main_w) = main_window {
+                main_w.set_always_on_top(true).map_err(|e| e.to_string())?;
+            }
+        } else {
+            if let Some(main_w) = main_window {
+                main_w.set_always_on_top(false).map_err(|e| e.to_string())?;
+            }
+            window.show().unwrap();
+            window.set_focus().unwrap();
+            window.set_ignore_cursor_events(false).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
 pub async fn quit_app(app: tauri::AppHandle) -> Result<(), String> {
     app.exit(0);
     Ok(())

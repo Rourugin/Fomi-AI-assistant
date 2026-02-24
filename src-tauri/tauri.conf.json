@@ -11,6 +11,7 @@
     "windows": [
       {
         "label": "main",
+        "url": "index.html",
         "title": "Fomi AI",
         "width": 600,
         "height": 800,
@@ -22,6 +23,19 @@
         "visible": true,
         "devtools": true,
         "shadow": false
+      },
+      {
+        "label": "dashboard",
+        "url": "dashboard.html",
+        "title": "Fomi Dashboard",
+        "transparent": true,
+        "decorations": false,
+        "visible": false,
+        "resizable": true,
+        "width": 900,
+        "height": 600,
+        "minWidth": 600,
+        "minHeight": 400
       }
     ],
     "security": {

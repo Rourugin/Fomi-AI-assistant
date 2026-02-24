@@ -62,7 +62,7 @@ To keep development active without selling user data, we plan two revenue stream
 | **Core Framework**| ✅ Stable      | Rust, Tauri 2.0               |
 | **Plugin Manager**| ✅ Stable      | File System, Serde JSON       |
 | **AI Engine**     | ✅ Stable      | `llama-cpp-2` (Llama 3.2 3B)  |
-| **Vector Memory** | 🚧 In Progress | **LanceDB**, `all-MiniLM-L6-v2`|
+| **Vector Memory** | ✅ Stable      | **LanceDB**, `all-MiniLM-L6-v2`|
 | **UI / Frontend** | 🚧 In Progress | HTML/JS (Later React/Svelte)  |
 
 ---

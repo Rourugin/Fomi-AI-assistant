@@ -7,4 +7,5 @@ export const getPersonalities = () => invoke('get_personalities');
 export const setPersonality = (name, wipe) => invoke('set_personality', { name, wipe });
 export const getActivePersonality = () => invoke('get_active_personality');
 
+export const toggleDashboard = () => invoke('toggle_dashboard');
 export const quitApp = () => invoke('quit_app');

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fomi Dashboard</title>
+  <link rel="stylesheet" href="styles/main.css"/>
+  <link rel="stylesheet" href="styles/dashboard.css"/>
+  <script type="module" src="/scripts/dashboard.js" defer></script>
+</head>
+<body>
+  <div class="app-container"> <nav class="sidebar">
+    <div class="sidebar-header">Fomi</div> 
+      <button class="nav-btn active" data-target="home">Home</button>
+      <button class="nav-btn" data-target="memory">Memory</button>
+      <button class="nav-btn" data-target="plugins">Plugins</button>
+      <button class="nav-btn" data-target="settings">Settings</button>
+      <div class="separator"></div>
+      <button id="btn-close-dash" class="dashboard-close-btn">Close</button>
+    </nav>
+
+    <main class="content-area">
+      <section id="view-home" class="view-section active">
+        <h2 class="dashboard-title">Home</h2>
+
+        <div class="chat-controls">
+          <input type="text" id="chat-input" class="input-area" placeholder="Say something to Fomi" />
+            <button id="send-btn">Send</button>
+          </div>
+
+          <div class="separator"></div>
+          <h3 class="dashboard-title">Personality Core</h3>
+          <div id="personality-container" class="personality-grid"></div>
+          <div class="separator"></div>
+        </div>
+      </section>
+
+      <section id="view-memory" class="view-section hidden">
+        <h2 class="dashboard-title">Memory Control</h2>
+      </section>
+
+      <section id="view-plugins" class="view-section hidden">
+        <h2 class="dashboard-title">Plugins</h2>
+      </section>
+
+      <section id="view-settings" class="view-section hidden">
+        <h2 class="dashboard-title">Settings</h2>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
