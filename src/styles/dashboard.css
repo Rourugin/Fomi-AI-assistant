@@ -18,7 +18,7 @@ body {
 }
 
 .sidebar {
-  width: 80px;
+  width: 130px;
   background: var(--bg-glass);
   border-right: 1px solid var(--border-glass);
   display: flex;
@@ -45,7 +45,6 @@ body {
   cursor: pointer;
   border-radius: 12px;
   transition: all 0.3s ease;
-  width: 50px;
   height: 50px;
   display: flex;
   align-items: center;
@@ -69,6 +68,9 @@ body {
   height: 100%;
   overflow: hidden;
   pointer-events: auto !important;
+  background: rgba(23, 23, 33, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .view-section {
@@ -114,14 +116,6 @@ body {
   box-shadow: 0 0 10px var(--accent-glow);
 }
 
-.dashboard-title {
-  color: var(--text-primary);
-  font-size: 24px;
-  margin: 0 0 20px 0;
-  font-weight: 600;
-  text-shadow: 0 0 10px var(--accent-glow);
-}
-
 #send-btn {
   background: var(--accent);
   color: #1a1b26;
@@ -155,9 +149,10 @@ body {
 .dashboard-title {
   color: var(--text-primary);
   font-size: 24px;
-  margin: 0 0 20px 0;
+  margin: 20px 0 20px 0;
   font-weight: 600;
   text-shadow: 0 0 10px var(--accent-glow);
+  text-align: center;
 }
 
 .personality-grid {
