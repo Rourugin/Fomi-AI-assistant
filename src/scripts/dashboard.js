@@ -2,10 +2,10 @@ import * as api from './api.js';
 import * as ui from './ui.js';
 
 
-const sidebar = document.getElementById('sidebar');
 const dashInput = document.getElementById('chat-input');
 const dashSendBtn = document.getElementById('send-btn');
 const personalityContainer = document.getElementById('personality-container');
+const closeBtn = document.getElementById('btn-close-dash');
 
 let isThink = false;
 let currentPersonality = await api.getActivePersonality();
@@ -40,8 +40,40 @@ personalityContainer.addEventListener('click', async (event) => {
   loadPersonalities();
 });
 
-document.getElementById('btn-close-dash').addEventListener('click', async () => {
+closeBtn.addEventListener('click', async () => {
   await api.toggleDashboard();
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.altKey) {
+    let targetKey = '';
+
+    switch (event.key) {
+      case '1':
+        targetKey = 'home';
+        break;
+      case '2':
+        targetKey = 'memory';
+        break;
+      case '3':
+        targetKey = 'plugins';
+        break;
+      case '4':
+        targetKey = 'settings';
+        break;
+    }
+
+    if (targetKey) {
+      const btnToClick = document.querySelector(`.nav-btn[data-target="${targetKey}"]`);
+      if (btnToClick) {
+        btnToClick.click();
+      }
+    }
+  }
+
+  if (event.key == 'Escape') {
+    closeBtn.click();
+  }
 });
 
 
