@@ -2,6 +2,7 @@ import * as api from './api.js';
 import * as ui from './ui.js';
 
 
+const sidebar = document.getElementById('sidebar');
 const dashInput = document.getElementById('chat-input');
 const dashSendBtn = document.getElementById('send-btn');
 const personalityContainer = document.getElementById('personality-container');
@@ -9,6 +10,7 @@ const personalityContainer = document.getElementById('personality-container');
 let isThink = false;
 let currentPersonality = await api.getActivePersonality();
 loadPersonalities();
+InitNavigation();
 
 
 dashSendBtn.addEventListener('click', async () => {
@@ -73,4 +75,30 @@ async function thinkInput(text) {
     isThink = false;
     ui.setAvatarState('idle');
   }
+}
+
+function InitNavigation() {
+  const navBtns = document.querySelectorAll('.nav-btn[data-target]');
+  const viewSections = document.querySelectorAll('.view-section');
+
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      navBtns.forEach(button => button.classList.remove('active'));
+      btn.classList.add('active');
+      const targetName = btn.getAttribute('data-target');
+      const targetSectionId = `view-${targetName}`;
+
+      viewSections.forEach(section => {
+        if (section.id === targetSectionId) {
+          section.classList.remove('hidden');
+          section.classList.add('active');
+        } else {
+          section.classList.add('hidden');
+          section.classList.remove('active');
+        }
+      });
+
+      localStorage.setItem('lastView', targetName);
+    });
+  });
 }
