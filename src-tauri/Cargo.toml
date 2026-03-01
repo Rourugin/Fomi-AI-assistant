@@ -37,3 +37,5 @@ futures = "0.3.31"
 chrono = "0.4.43"
 sha256 = "1.6.0"
 ort = { version = "2.0.0-rc.11", default-features = false, features = ["load-dynamic"] }
+wasmtime = "42.0.1"
+wasi-common = "42.0.1"

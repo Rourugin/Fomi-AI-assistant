@@ -1,5 +1,5 @@
-use std::{sync::Mutex};
-use crate::{ai_engine::{AiCore, AiSession}, memory};
+use std::{collections::HashMap, sync::{Arc, Mutex, RwLock}};
+use crate::{ai_engine::{AiCore, AiSession}, memory, plugin_system::interface::FomiTool};
 
 
 pub struct SessionManager {
@@ -7,6 +7,7 @@ pub struct SessionManager {
     session: Mutex<Option<AiSession>>,
     current_system_prompt: Mutex<String>,
     memory: memory::MemorySystem,
+    pub registry: Arc<ToolRegistry>,
 }
 
 impl SessionManager {
@@ -18,6 +19,7 @@ impl SessionManager {
             session: Mutex::new(Option::from(new_session)), 
             current_system_prompt: Mutex::new(system_prompt.to_string()),
             memory,
+            registry: Arc::new(ToolRegistry::new()),
         })
     }
 
@@ -84,5 +86,51 @@ impl SessionManager {
         *session_guard = Some(new_session);
 
         Ok(())
+    }
+
+    pub fn register_tool(&self, tool: Box<dyn FomiTool>) {
+        self.registry.register(tool);
+    }
+}
+
+
+pub struct ToolRegistry {
+    tools: RwLock<HashMap<String, Arc<dyn FomiTool>>>,
+}
+
+impl ToolRegistry {
+    pub fn new() -> ToolRegistry {
+        let tools_hasmap = HashMap::new();
+        ToolRegistry {
+            tools: RwLock::new(tools_hasmap)
+        }
+    }
+
+    pub fn register(&self, tool: Box<dyn FomiTool>) {
+
+    }
+
+    pub fn get(&self, name: &str) -> Option<Arc<dyn FomiTool>> {
+        None
+    }
+
+    pub fn generate_system_prompt_suffix(&self) -> String {
+        let guard = self.tools.read().unwrap();
+        if guard.is_empty() {
+            return String::new();
+        }
+
+        let mut prompt = String::from("\n\nAVAILABLE TOOLS:\n");
+        for tool in guard.values() {
+            prompt.push_str(&format!("- {}: {}\n Schema: {}\n",
+                tool.name(),
+                tool.description(),
+                tool.parameters_schema()
+            ));
+        }
+
+        prompt.push_str("\nTo use a tool, output ONLY this JSON format:\n");
+        prompt.push_str("{\"tool\": \"tool_name\", \"args\": { ... }}\n");
+        prompt
     }
 }

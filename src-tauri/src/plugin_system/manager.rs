@@ -1,7 +1,8 @@
-use crate::plugin_system::manifest::PluginManifest;
+use crate::plugin_system::{interface::FomiTool, manifest::PluginManifest, wasm_runtime::WasmPlugin};
 use std::{fs::{self, OpenOptions}, sync::Mutex};
 use serde_json::{from_reader, to_writer_pretty};
 use serde::{Deserialize, Serialize};
+use tauri::utils::acl::manifest;
 use std::path::PathBuf;
 
 
@@ -63,5 +64,43 @@ impl PluginManager {
         let file = fs::File::open(path)?;
         let data: PluginData = from_reader(file)?;
         Ok(data.plugins)
+    }
+
+    pub fn load_plugins_from_disk(&self) -> Vec<Box<dyn FomiTool>> {
+        let mut loaded_tools = Vec::new();
+
+        let plugins_dir = self.config_file_path.parent().unwrap().join("plugins");
+        if !plugins_dir.exists() {
+            fs::create_dir_all(&plugins_dir).unwrap_or_default();
+            return loaded_tools
+        }
+
+        if let Ok(entries) = fs::read_dir(plugins_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    let manifest_path = path.join("manifest.json");
+                    let wasm_path = path.join("plugin.wasm");
+
+                    if manifest_path.exists() && wasm_path.exists() {
+                        if let Ok(file) = fs::File::open(&manifest_path){
+                            if let Ok(manifest) = serde_json::from_reader::<_, PluginManifest>(file) {
+                                match WasmPlugin::load(wasm_path, manifest) {
+                                    Ok(plugin) => {
+                                        println!("Loaded plugin: {}", plugin.name());
+                                        loaded_tools.push(Box::new(plugin));
+                                    }
+                                    Err(e) => {
+                                        eprint!("Failed to load WASM for {}: {}", path.display(), e);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        loaded_tools
     }
 }

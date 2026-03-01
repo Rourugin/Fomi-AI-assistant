@@ -23,6 +23,9 @@ pub fn run() {
                 std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
             };
 
+            let plugin_manager = plugin_system::manager::PluginManager::new(app_config_dir.clone());
+            let loaded_tools = plugin_manager.load_plugins_from_disk();
+
             match ai_engine::AiCore::new(model_path) {
                 Ok(core) => {
                     println!("AI is alive");
@@ -48,6 +51,9 @@ pub fn run() {
                         Ok(memory) => {
                             match session_manager::SessionManager::new(core, &initial_prompt, memory) {
                                 Ok(manager) => {
+                                    for tool in loaded_tools {
+                                        manager.register_tool(tool);
+                                    }
                                     println!("Session started");
                                     app.manage(manager);
                                 }
