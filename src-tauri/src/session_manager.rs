@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use std::{collections::HashMap, sync::{Arc, Mutex, RwLock}};
 use crate::{ai_engine::{AiCore, AiSession}, memory, plugin_system::interface::FomiTool};
 
@@ -36,8 +37,9 @@ impl SessionManager {
         Ok(())
     }
 
-    pub async fn think(&self, text: &str) -> Result<String, String> {
+    pub async fn think(&self, text: &str) -> Result<String, Box<dyn std::error::Error>> {
         let system_prompt = self.current_system_prompt.lock().unwrap().clone();
+        let prompt_prefix = self.registry.generate_system_prompt_suffix();
         let memories = self.memory.retrieve(text, 3).await.map_err(|e| e.to_string())?;
         let context_block = if memories.is_empty() {
             String::new()
@@ -48,26 +50,26 @@ impl SessionManager {
         let full_prompt = format!(
             "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{}{}<|eot_id|>\n\
             <|start_header_id|>user<|end_header_id|>\n{}<|eot_id|>\n\
+            <|start_header_id>tools and plugins<|end_header_id|>\n{}<|eot_id|>\n\
             <|start_header_id|>assistant<|end_header_id|>\n",
-            system_prompt, context_block, text
+            system_prompt, context_block, text, prompt_prefix
         );
 
-        let session_opt = self.session.lock().unwrap().take();
-        let mut session = session_opt.ok_or_else(|| "No active session".to_string())?;
+        let max_steps= 5u8;
+        let mut current_step = 0u8;
+        let mut next_input = text;
+        let role_for_next_input = "user";
 
-        let answer = session.infer(&full_prompt).map_err(|e| format!("{}", e))?;
-
-        *self.session.lock().unwrap() = Some(session);
-
-        if let Err(e) = self.memory.ingest(text, "user").await {
-            eprintln!("Failed to save user memory: {}", e);
+        while current_step < max_steps {
+            let session_opt = self.session.lock().unwrap().take();
+            let mut session = session_opt.ok_or_else(|| "No active session".to_string()).unwrap();
+            let prompt_part = "".to_string();
+            let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e)).unwrap();
+            *self.session.lock().unwrap() = Some(session);
         }
 
-        if let Err(e) = self.memory.ingest(&answer, "assistant").await {
-            eprintln!("Failed to save assistant memory: {}", e);
-        }
 
-        Ok(answer)
+        Ok("".to_string())
     }
 
     fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
@@ -132,5 +134,18 @@ impl ToolRegistry {
         prompt.push_str("\nTo use a tool, output ONLY this JSON format:\n");
         prompt.push_str("{\"tool\": \"tool_name\", \"args\": { ... }}\n");
         prompt
+    }
+}
+
+
+#[derive(Deserialize)]
+struct ToolCallRequest {
+    tool: String,
+    args: serde_json::Value,
+}
+
+impl ToolCallRequest {
+    pub fn register(tool: Box<dyn FomiTool>) {
+
     }
 }
