@@ -60,16 +60,48 @@ impl SessionManager {
         let mut next_input = text;
         let role_for_next_input = "user";
 
+        let mut prompt_part = full_prompt.clone();
+        let mut final_answer = String::new();
+
         while current_step < max_steps {
             let session_opt = self.session.lock().unwrap().take();
             let mut session = session_opt.ok_or_else(|| "No active session".to_string()).unwrap();
-            let prompt_part = "".to_string();
+
             let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e)).unwrap();
-            *self.session.lock().unwrap() = Some(session);
+            if let Some(request) = parse_tool_call(&answer) {
+                if let Some(plugin ) = self.registry.get(&request.tool) {
+                    let tool_result = plugin.execute(request.args);
+
+                    let result_text = match tool_result {
+                        Ok(result) => result,
+                        Err(e) => e,
+                    };
+                    prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
+                } else {
+                    prompt_part = "<|start_header_id|>system<|end_header_id|>\nError: Tool not found. Try again.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n".to_string();
+                }
+
+                *self.session.lock().unwrap() = Some(session);
+                current_step += 1;
+
+                continue;
+            } else {
+                final_answer = answer;
+                *self.session.lock().unwrap() = Some(session);
+
+                break;
+            }
         }
 
+        if let Err(e) = self.memory.ingest(text, "user").await {
+            eprint!("Failed to save user memory: {}", e);
+        }
 
-        Ok("".to_string())
+        if let Err(e) = self.memory.ingest(&final_answer, "assistant").await {
+            eprint!("Failed to save assistant memory: {}", e);
+        }
+
+        Ok(final_answer)
     }
 
     fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
@@ -104,16 +136,18 @@ impl ToolRegistry {
     pub fn new() -> ToolRegistry {
         let tools_hasmap = HashMap::new();
         ToolRegistry {
-            tools: RwLock::new(tools_hasmap)
+            tools: RwLock::new(tools_hasmap),
         }
     }
 
     pub fn register(&self, tool: Box<dyn FomiTool>) {
-
+        let mut guard = self.tools.write().unwrap();
+        guard.insert(tool.name().to_string(), Arc::from(tool));
     }
 
     pub fn get(&self, name: &str) -> Option<Arc<dyn FomiTool>> {
-        None
+        let guard =self.tools.read().unwrap();
+        guard.get(name).cloned()
     }
 
     pub fn generate_system_prompt_suffix(&self) -> String {
@@ -144,8 +178,15 @@ struct ToolCallRequest {
     args: serde_json::Value,
 }
 
-impl ToolCallRequest {
-    pub fn register(tool: Box<dyn FomiTool>) {
 
+fn parse_tool_call(text: &str) -> Option<ToolCallRequest> {
+    let start = text.find("{").unwrap();
+    let end = text.rfind("}").unwrap();
+
+    if start < end {
+        let slice = &text[start..=end];
+        serde_json::from_str(slice).ok()
+    } else {
+        None
     }
 }
