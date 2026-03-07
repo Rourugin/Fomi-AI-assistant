@@ -1,5 +1,6 @@
 use std::sync::Mutex;
 use serde_json::Value;
+use uuid::Uuid;
 use wasi_common::sync::WasiCtxBuilder;
 use std::path::PathBuf;
 use wasmtime::{Engine, Instance, Linker, Memory, Module, Store};
@@ -7,6 +8,7 @@ use crate::plugin_system::{manifest::PluginManifest, interface::FomiTool};
 
 
 pub struct WasmPlugin {
+    id: Uuid,
     name: String,
     description: String,
     store: Mutex<Store<wasi_common::WasiCtx>>,
@@ -38,6 +40,7 @@ impl WasmPlugin {
             .unwrap();
 
         Ok(WasmPlugin{
+            id: Uuid::new_v4(),
             name: manifest.name().to_string(),
             description: manifest.description().to_string(),
             store: Mutex::new(store),
@@ -78,6 +81,10 @@ impl WasmPlugin {
 
 
 impl FomiTool for WasmPlugin {
+    fn id(&self) -> Uuid {
+        self.id
+    }
+
     fn name(&self) -> &str {
         &self.name
     }
@@ -93,8 +100,7 @@ impl FomiTool for WasmPlugin {
     fn execute(&self, args: Value) -> Result<String, String> {
         let mut store_guard = self.store
             .lock()
-            .map_err(|_| "Failed to lock store".to_string())
-            .unwrap();
+            .map_err(|_| "Mutex poisoned")?;
         let store = &mut *store_guard;
 
         let json_args = args.to_string();

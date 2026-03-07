@@ -52,7 +52,7 @@ pub enum SecurityLevel {
     Paranoid,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[allow(dead_code)]
 pub enum CheckResult{
     Granted,
@@ -88,7 +88,7 @@ pub enum Permission {
     },
 
     Custom {
-        id: String,
+        id: Uuid,
         params: Value,
     },
 }

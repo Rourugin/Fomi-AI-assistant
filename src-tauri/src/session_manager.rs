@@ -1,6 +1,7 @@
 use serde::Deserialize;
+use crate::{ai_engine::{AiCore, AiSession}, memory};
 use std::{collections::HashMap, sync::{Arc, Mutex, RwLock}};
-use crate::{ai_engine::{AiCore, AiSession}, memory, plugin_system::interface::FomiTool};
+use crate::plugin_system::{interface::FomiTool, permission::{CheckContext, CheckResult, Permission, PermissionChecker, SecurityLevel}};
 
 
 pub struct SessionManager {
@@ -9,18 +10,22 @@ pub struct SessionManager {
     current_system_prompt: Mutex<String>,
     memory: memory::MemorySystem,
     pub registry: Arc<ToolRegistry>,
+    permission_checker: Arc<Mutex<PermissionChecker>>,
 }
 
 impl SessionManager {
     pub fn new(core: AiCore, system_prompt: &str, memory: memory::MemorySystem) -> Result<SessionManager, Box<dyn std::error::Error>> {
         let new_session = core.start_session(&system_prompt)
             .map_err(|e| format!("Failed to create new session: {}", e))?;
+        let permission_checker = PermissionChecker::new(SecurityLevel::Medium);
+
         Ok(SessionManager {
             core, 
             session: Mutex::new(Option::from(new_session)), 
             current_system_prompt: Mutex::new(system_prompt.to_string()),
             memory,
             registry: Arc::new(ToolRegistry::new()),
+            permission_checker: Arc::new(Mutex::new(permission_checker)),
         })
     }
 
@@ -38,7 +43,10 @@ impl SessionManager {
     }
 
     pub async fn think(&self, text: &str) -> Result<String, Box<dyn std::error::Error>> {
-        let system_prompt = self.current_system_prompt.lock().unwrap().clone();
+        let system_prompt = self.current_system_prompt
+            .lock()
+            .map_err(|_| "Mutex poisoned")?
+            .clone();
         let prompt_prefix = self.registry.generate_system_prompt_suffix();
         let memories = self.memory.retrieve(text, 3).await.map_err(|e| e.to_string())?;
         let context_block = if memories.is_empty() {
@@ -57,37 +65,52 @@ impl SessionManager {
 
         let max_steps= 5u8;
         let mut current_step = 0u8;
-        let mut next_input = text;
-        let role_for_next_input = "user";
 
         let mut prompt_part = full_prompt.clone();
         let mut final_answer = String::new();
 
         while current_step < max_steps {
-            let session_opt = self.session.lock().unwrap().take();
-            let mut session = session_opt.ok_or_else(|| "No active session".to_string()).unwrap();
+            let session_opt = self.session
+                .lock()
+                .map_err(|_| "Mutex poisoned")?
+                .take();
+            let mut session = session_opt.ok_or_else(|| "No active session".to_string())?;
 
-            let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e)).unwrap();
+            let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e))?;
             if let Some(request) = parse_tool_call(&answer) {
                 if let Some(plugin ) = self.registry.get(&request.tool) {
-                    let tool_result = plugin.execute(request.args);
+                    let plugin_id = plugin.id();
+                    let checker = self.permission_checker.lock().map_err(|_| "Mutex poisoned")?;
+                    let context = CheckContext::default();
 
-                    let result_text = match tool_result {
-                        Ok(result) => result,
-                        Err(e) => e,
+                    let required_permission = Permission::Custom {
+                        id: plugin_id,
+                        params: request.args.clone(),
                     };
-                    prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
+                    let check_result = checker.check(&plugin_id, &required_permission, Some(&context));
+
+                    if check_result == CheckResult::Granted {
+                        let tool_result = plugin.execute(request.args);
+
+                        let result_text = match tool_result {
+                            Ok(result) => result,
+                            Err(e) => e,
+                        };
+                        prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
+                    } else if let CheckResult::Denied(reason) = check_result {
+                        prompt_part = format!("<|start_header_id|>system<|end_header_id|>\nPermission Denied: {}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", reason);
+                    }
                 } else {
                     prompt_part = "<|start_header_id|>system<|end_header_id|>\nError: Tool not found. Try again.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n".to_string();
                 }
 
-                *self.session.lock().unwrap() = Some(session);
+                *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
                 current_step += 1;
 
                 continue;
             } else {
                 final_answer = answer;
-                *self.session.lock().unwrap() = Some(session);
+                *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
 
                 break;
             }
@@ -106,7 +129,9 @@ impl SessionManager {
 
     fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
         let new_current_prompt = {
-            let mut prompt_guard = self.current_system_prompt.lock().unwrap();
+            let mut prompt_guard = self.current_system_prompt
+                .lock()
+                .map_err(|_| "Mutex poisoned")?;
             
             if let Some(new_p) = new_prompt {
                 *prompt_guard = new_p.to_string();
@@ -116,7 +141,9 @@ impl SessionManager {
         };
 
         let new_session = self.core.start_session(&new_current_prompt)?;
-        let mut session_guard = self.session.lock().unwrap();
+        let mut session_guard = self.session
+            .lock()
+            .map_err(|_| "Mutex poisoned")?;
         *session_guard = Some(new_session);
 
         Ok(())
@@ -180,8 +207,8 @@ struct ToolCallRequest {
 
 
 fn parse_tool_call(text: &str) -> Option<ToolCallRequest> {
-    let start = text.find("{").unwrap();
-    let end = text.rfind("}").unwrap();
+    let start = text.find("{")?;
+    let end = text.rfind("}")?;
 
     if start < end {
         let slice = &text[start..=end];

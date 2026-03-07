@@ -17,7 +17,7 @@ pub fn run() {
                 .parent()
                 .expect("Failed to get parent directory")
                 .join("models/model.gguf");
-            let app_config_dir = app.path().app_config_dir().unwrap();
+            let app_config_dir = app.path().app_config_dir()?;
 
             if !app_config_dir.exists() {
                 std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
@@ -35,8 +35,7 @@ pub fn run() {
                         .resolve("assets/personalities", tauri::path::BaseDirectory::Resource)
                         .unwrap()
                         .join(personality_filename);
-                    let initial_prompt = fs::read_to_string(&personality_path)
-                        .unwrap_or_else(|_| "You are Fomi, a helpful assistant.".to_string());
+                    let initial_prompt = fs::read_to_string(&personality_path)?;
 
                     let app_data_dir = app.path().app_data_dir().unwrap();
                     let db_path = app_data_dir.join("memory_db");

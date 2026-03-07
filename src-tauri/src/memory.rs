@@ -33,7 +33,9 @@ impl MemorySystem {
     pub async fn ingest(&self, text: &str, source: &str) -> Result<(), Box<dyn std::error::Error>> {
         let id = Uuid::new_v4();
         let vector = {
-            let mut embedder_guard = self.embedder.lock().map_err(|_| "Mutex poison error")?;
+            let mut embedder_guard = self.embedder
+                .lock()
+                .map_err(|_| "Mutex poison error")?;
             embedder_guard.embed(text)?
         };
         let chunks = self.split_text(text);
@@ -47,7 +49,9 @@ impl MemorySystem {
 
     pub async fn retrieve(&self, text: &str, limit: usize) -> Result<Vec<String>, Box<dyn std::error::Error>> {
         let vector = {
-            let mut embedder_guard = self.embedder.lock().map_err(|_| "Mutex poison error")?;
+            let mut embedder_guard = self.embedder
+                .lock()
+                .map_err(|_| "Mutex poison error")?;
             embedder_guard.embed(text)?
         };
         let results = self.store.search(vector, limit).await?;

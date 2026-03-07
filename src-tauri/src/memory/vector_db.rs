@@ -128,13 +128,13 @@ impl FomiVectorStore {
                 .ok_or("No id column")?
                 .as_any()
                 .downcast_ref::<StringArray>()
-                .unwrap();
+                .ok_or("Type mismatch in DB column")?;
 
             let texts = batch.column_by_name("text")
                 .ok_or("No text column")?
                 .as_any()
                 .downcast_ref::<StringArray>()
-                .unwrap();
+                .ok_or("Type mismatch in DB column")?;
 
             let distances = batch.column_by_name("_distance")
                 .ok_or("No distance column")?
