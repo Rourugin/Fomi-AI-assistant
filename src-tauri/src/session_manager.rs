@@ -150,7 +150,13 @@ impl SessionManager {
     }
 
     pub fn register_tool(&self, tool: Box<dyn FomiTool>) {
+        let plugin_id = tool.id();
+        let plugin_perms = tool.required_permissions();
+
         self.registry.register(tool);
+
+        let mut checker = self.permission_checker.lock().unwrap();
+        checker.register_plugin(plugin_id, plugin_perms).map_err(|e| e.to_string());
     }
 }
 

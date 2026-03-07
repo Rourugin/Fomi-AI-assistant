@@ -82,8 +82,8 @@ impl PluginManifest {
         &self.api_version
     }
 
-    pub fn permissions(&self) -> &[Permission] {
-        &self.permissions
+    pub fn permissions(&self) -> Vec<Permission> {
+        self.permissions.clone()
     }
 
     pub fn add_permission(&mut self, permission: Permission) -> Result<(), String> {

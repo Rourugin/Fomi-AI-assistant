@@ -1,5 +1,6 @@
 use serde_json::Value;
 use uuid::Uuid;
+use crate::plugin_system::permission::Permission;
 
 
 pub trait FomiTool: Send + Sync {
@@ -8,4 +9,5 @@ pub trait FomiTool: Send + Sync {
     fn description(&self) -> &str;
     fn parameters_schema(&self) -> Value;
     fn execute(&self, args: Value) -> Result<String, String>;
+    fn required_permissions(&self) -> Vec<Permission>;
 }
