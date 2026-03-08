@@ -1,4 +1,5 @@
 const { invoke } = window.__TAURI__.core;
+
 export const setIgnoreCursor = (ignore) => invoke('set_ignore_cursor', { ignore });
 
 export const fomiThink = (text) => invoke('fomi_think', { text });

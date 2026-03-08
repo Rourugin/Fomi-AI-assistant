@@ -1,5 +1,5 @@
 use std::fs;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 use crate::{session_manager, settings};
 
 
@@ -14,8 +14,14 @@ pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>
 }
 
 #[tauri::command]
-pub async fn fomi_think(state: tauri::State<'_, session_manager::SessionManager>, text: String) -> Result<String, String> {
-    state.think(&text).await.map_err(|e| e.to_string())
+pub async fn fomi_think(app: tauri::AppHandle, state: tauri::State<'_, session_manager::SessionManager>, text: String) -> Result<String, String> {
+    let response = state.think(&text).await.map_err(|e| e.to_string())?;
+
+    if let Some(main_window) = app.get_webview_window("main") {
+        let _ = main_window.emit("show-subtitle", &response);
+    }
+
+    Ok(response)
 }
 
 #[tauri::command]

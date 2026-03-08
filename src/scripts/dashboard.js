@@ -98,11 +98,9 @@ async function thinkInput(text) {
   ui.setAvatarState('think');
 
   try {
-    const response = await api.fomiThink(text);
-    await ui.showSubtitle(response);
+    await api.fomiThink(text);
   } catch (e) {
     console.error(e);
-    await ui.showSubtitle("AI Error: " + e);
   } finally {
     isThink = false;
     ui.setAvatarState('idle');

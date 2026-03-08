@@ -5,15 +5,20 @@ import * as ui from './ui.js';
 const characterContainer = document.getElementById('character-container');
 const contextMenu = document.getElementById('context-menu');
 
+const listen = window.__TAURI__.event?.listen;
+
 let isDragging = false;
 let isInterfaceLocked = false;
 let offsetX = 0;
 let offsetY = 0;
 
-
 window.addEventListener('DOMContentLoaded', () => {
   ui.preloadImages();
 });
+
+listen('show-subtitle', (event) => {
+  ui.showSubtitle(event.payload);
+}).catch(console.error);
 
 characterContainer.addEventListener('mouseenter', async () => {
   await api.setIgnoreCursor(false);

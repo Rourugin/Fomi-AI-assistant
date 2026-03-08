@@ -156,7 +156,9 @@ impl SessionManager {
         self.registry.register(tool);
 
         let mut checker = self.permission_checker.lock().unwrap();
-        checker.register_plugin(plugin_id, plugin_perms).map_err(|e| e.to_string());
+        if let Err(e) = checker.register_plugin(plugin_id, plugin_perms) {
+            eprintln!("Failed to register plugin permissions: {}", e);
+        }
     }
 }
 
