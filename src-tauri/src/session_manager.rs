@@ -17,7 +17,7 @@ impl SessionManager {
     pub fn new(core: AiCore, system_prompt: &str, memory: memory::MemorySystem) -> Result<SessionManager, Box<dyn std::error::Error>> {
         let new_session = core.start_session(&system_prompt)
             .map_err(|e| format!("Failed to create new session: {}", e))?;
-        let permission_checker = PermissionChecker::new(SecurityLevel::Medium);
+        let permission_checker = PermissionChecker::new(SecurityLevel::Low);
 
         Ok(SessionManager {
             core, 
@@ -78,31 +78,7 @@ impl SessionManager {
 
             let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e))?;
             if let Some(request) = parse_tool_call(&answer) {
-                if let Some(plugin ) = self.registry.get(&request.tool) {
-                    let plugin_id = plugin.id();
-                    let checker = self.permission_checker.lock().map_err(|_| "Mutex poisoned")?;
-                    let context = CheckContext::default();
-
-                    let required_permission = Permission::Custom {
-                        id: plugin_id,
-                        params: request.args.clone(),
-                    };
-                    let check_result = checker.check(&plugin_id, &required_permission, Some(&context));
-
-                    if check_result == CheckResult::Granted {
-                        let tool_result = plugin.execute(request.args);
-
-                        let result_text = match tool_result {
-                            Ok(result) => result,
-                            Err(e) => e,
-                        };
-                        prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
-                    } else if let CheckResult::Denied(reason) = check_result {
-                        prompt_part = format!("<|start_header_id|>system<|end_header_id|>\nPermission Denied: {}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", reason);
-                    }
-                } else {
-                    prompt_part = "<|start_header_id|>system<|end_header_id|>\nError: Tool not found. Try again.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n".to_string();
-                }
+                prompt_part = self.process_tool_call(request)?;
 
                 *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
                 current_step += 1;
@@ -158,6 +134,40 @@ impl SessionManager {
         let mut checker = self.permission_checker.lock().unwrap();
         if let Err(e) = checker.register_plugin(plugin_id, plugin_perms) {
             eprintln!("Failed to register plugin permissions: {}", e);
+        }
+    }
+
+    fn process_tool_call(&self, request: ToolCallRequest) -> Result<String, String> {
+        if let Some(plugin ) = self.registry.get(&request.tool) {
+            let plugin_id = plugin.id();
+            let checker = self.permission_checker.lock().map_err(|_| "Mutex poisoned")?;
+            let context = CheckContext::default();
+
+            let required_permission = Permission::Custom {
+                id: plugin_id,
+                params: request.args.clone(),
+            };
+            let check_result = checker.check(&plugin_id, &required_permission, Some(&context));
+
+            let mut prompt_part = "".to_string();
+
+            if check_result == CheckResult::Granted {
+                let tool_result = plugin.execute(request.args);
+
+                let result_text = match tool_result {
+                    Ok(result) => result,
+                    Err(e) => e,
+                };
+                prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
+            } else if let CheckResult::Denied(reason) = check_result {
+                prompt_part = format!("<|start_header_id|>system<|end_header_id|>\nPermission Denied: {}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", reason);
+            }
+
+            self.permission_checker.lock().unwrap().update_user_decision(&plugin_id, &required_permission, true).unwrap();
+
+            Ok(prompt_part)
+        } else {
+            Ok("<|start_header_id|>system<|end_header_id|>\nError: Tool not found. Try again.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n".to_string())
         }
     }
 }
