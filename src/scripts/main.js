@@ -16,6 +16,10 @@ window.addEventListener('DOMContentLoaded', () => {
   ui.preloadImages();
 });
 
+listen('avatar-state-change', (event) => {
+  ui.setAvatarState(event.payload);
+}).catch(console.error);
+
 listen('show-subtitle', (event) => {
   ui.showSubtitle(event.payload);
 }).catch(console.error);

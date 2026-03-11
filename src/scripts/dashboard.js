@@ -95,7 +95,7 @@ async function thinkInput(text) {
     return
   };
   isThink = true;
-  ui.setAvatarState('think');
+  await api.setFomiAvatarThink();
 
   try {
     await api.fomiThink(text);
