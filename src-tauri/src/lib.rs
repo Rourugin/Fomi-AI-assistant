@@ -80,7 +80,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::general::set_ignore_cursor,
             commands::general::fomi_reset,
-            commands::general::set_fomi_avatar_think,
+            commands::general::set_fomi_avatar_state,
             commands::general::fomi_think,
             commands::general::get_personalities,
             commands::general::set_personality,

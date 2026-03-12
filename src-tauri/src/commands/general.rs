@@ -14,9 +14,7 @@ pub async fn fomi_reset(state: tauri::State<'_, session_manager::SessionManager>
 }
 
 #[tauri::command]
-pub async fn set_fomi_avatar_think(app: tauri::AppHandle) -> Result<String, String> {
-    let state = "think".to_string();
-
+pub async fn set_fomi_avatar_state(app: tauri::AppHandle, state: String) -> Result<String, String> {
     if let Some(main_window) = app.get_webview_window("main") {
         let _ = main_window.emit("avatar-state-change", state.clone());
     }
