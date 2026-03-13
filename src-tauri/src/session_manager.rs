@@ -58,7 +58,7 @@ impl SessionManager {
         let full_prompt = format!(
             "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{}{}<|eot_id|>\n\
             <|start_header_id|>user<|end_header_id|>\n{}<|eot_id|>\n\
-            <|start_header_id>tools and plugins<|end_header_id|>\n{}<|eot_id|>\n\
+            <|start_header_id|>tools and plugins<|end_header_id|>\n{}<|eot_id|>\n\
             <|start_header_id|>assistant<|end_header_id|>\n",
             system_prompt, context_block, text, prompt_prefix
         );
@@ -143,10 +143,7 @@ impl SessionManager {
             let checker = self.permission_checker.lock().map_err(|_| "Mutex poisoned")?;
             let context = CheckContext::default();
 
-            let required_permission = Permission::Custom {
-                id: plugin_id,
-                params: request.args.clone(),
-            };
+            let required_permission = Permission::PluginExecute { id: plugin_id };
             let check_result = checker.check(&plugin_id, &required_permission, Some(&context));
 
             let mut prompt_part = "".to_string();
@@ -158,12 +155,11 @@ impl SessionManager {
                     Ok(result) => result,
                     Err(e) => e,
                 };
-                prompt_part = format!("<|start_header_id|>tool_result<|end_header_id|>\n{}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
+                println!("[DEBUG] Плагин вернул: {}", result_text);
+                prompt_part = format!("<|eot_id|>\n<|start_header_id|>user<|end_header_id|>\n[SYSTEM UPDATE]: The requested tool executed successfully. Result data:\n{}\n\nBased on this data, please answer my previous request naturally.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
             } else if let CheckResult::Denied(reason) = check_result {
                 prompt_part = format!("<|start_header_id|>system<|end_header_id|>\nPermission Denied: {}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", reason);
             }
-
-            self.permission_checker.lock().unwrap().update_user_decision(&plugin_id, &required_permission, true).unwrap();
 
             Ok(prompt_part)
         } else {

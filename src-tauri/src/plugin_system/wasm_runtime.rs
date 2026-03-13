@@ -35,7 +35,7 @@ impl WasmPlugin {
             .ok_or("Plugin must export 'memory'".to_string())?;
 
         Ok(WasmPlugin{
-            id: Uuid::new_v4(),
+            id: manifest.id().clone(),
             manifest,
             store: Mutex::new(store),
             instance,

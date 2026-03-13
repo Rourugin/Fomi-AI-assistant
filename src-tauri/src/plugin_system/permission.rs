@@ -87,6 +87,10 @@ pub enum Permission {
         screen_recording_access: bool,
     },
 
+    PluginExecute {
+        id: Uuid
+    },
+
     Custom {
         id: Uuid,
         params: Value,
@@ -120,8 +124,12 @@ impl std::hash::Hash for Permission {
                 camera_access.hash(state);
                 screen_recording_access.hash(state);
             }
-            Permission::Custom {id, ..} => {
+            Permission::PluginExecute { id } => {
                 5.hash(state);
+                id.hash(state);
+            }
+            Permission::Custom {id, ..} => {
+                6.hash(state);
                 id.hash(state);
             }
         }
