@@ -84,6 +84,7 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
 * **Rust**: Stable toolchain.
 * **C++ Build Tools**: `cmake`, `clang` (required for AI engine compilation).
 * **Node.js**: For frontend bundling.
+* **Local Llama-cpp-2**: The project uses a locally patched version of the `llama-cpp-2` crate (located in `./llama-cpp-2-local`) to fix memory allocation issues (mmap) on Windows. Cargo will automatically resolve this via the `[patch]` section in `Cargo.toml`.
 
 ### Installation
 

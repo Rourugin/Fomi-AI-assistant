@@ -1,4 +1,4 @@
-use std::{env, fs, io::Read};
+use std::{env, fs};
 use tauri::Manager;
 pub mod plugin_system;
 mod session_manager;
@@ -16,7 +16,8 @@ pub fn run() {
                 .expect("Failed to get current directory")
                 .parent()
                 .expect("Failed to get parent directory")
-                .join("models/model.gguf");
+                .join("models")
+                .join("model.gguf");
             let app_config_dir = app.path().app_config_dir()?;
 
             if !app_config_dir.exists() {
