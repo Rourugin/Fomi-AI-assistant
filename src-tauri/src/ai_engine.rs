@@ -1,8 +1,24 @@
 use llama_cpp_2::{model::{AddBos, LlamaModel, Special, params::LlamaModelParams}, token::{LlamaToken, data_array::LlamaTokenDataArray}};
 use llama_cpp_2::{context::{LlamaContext, params::LlamaContextParams}, llama_backend::LlamaBackend, llama_batch::LlamaBatch};
-use std::{num::NonZeroU32, path::PathBuf, sync::Arc};
+use std::{num::NonZeroU32, path::PathBuf, sync::Arc, ffi::CStr, os::raw::{c_char, c_void}, ptr::null_mut};
+use llama_cpp_sys_2::{llama_pos, ggml_log_level, llama_log_set};
 use ouroboros::{self_referencing};
-use llama_cpp_sys_2::llama_pos;
+
+
+#[no_mangle]
+pub unsafe extern "C" fn fomi_log_callback(_level: ggml_log_level, c_text: *const c_char, _user_data: *mut c_void) {
+    if c_text.is_null() {
+        return
+    }
+
+    if let Ok(log_str) = CStr::from_ptr(c_text).to_str() {
+        if log_str.contains("ggml_cuda_graph_set_enabled") || log_str.contains("disabling CUDA graphs") {
+            return
+        }
+
+        print!("{}", log_str);
+    }
+}
 
 
 pub struct AiCore {
@@ -12,6 +28,10 @@ pub struct AiCore {
 
 impl AiCore {
     pub fn new(path: PathBuf) -> Result<AiCore, Box<dyn std::error::Error>> {
+        unsafe {
+            llama_log_set(Some(fomi_log_callback), null_mut());
+        }
+
         let backend = Arc::new(LlamaBackend::init()?);
         let params = LlamaModelParams::default();
         let model = Arc::new(LlamaModel::load_from_file(&backend, path, &params)
