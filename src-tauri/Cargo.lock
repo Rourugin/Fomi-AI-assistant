@@ -2967,6 +2967,7 @@ dependencies = [
  "device_query",
  "fastembed",
  "futures",
+ "iana-time-zone",
  "lancedb",
  "llama-cpp-2",
  "llama-cpp-sys-2",

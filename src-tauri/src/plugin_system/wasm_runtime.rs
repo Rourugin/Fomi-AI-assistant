@@ -1,3 +1,4 @@
+use iana_time_zone::get_timezone;
 use uuid::Uuid;
 use std::sync::Mutex;
 use serde_json::Value;
@@ -19,11 +20,14 @@ impl WasmPlugin {
     pub fn load(path: PathBuf, manifest: PluginManifest) -> Result<WasmPlugin, String> {
         let engine = Engine::default();
         let mut linker = Linker::new(&engine);
+        let tz_string = get_timezone().map_err(|e| e.to_string())?;
 
         wasi_common::sync::add_to_linker(&mut linker, |s| s)
             .map_err(|e| e.to_string())?;
         let wasi = WasiCtxBuilder::new()
             .inherit_stdio()
+            .env("TZ", &tz_string)
+            .map_err(|e| e.to_string())?
             .build();
         let mut store = Store::new(&engine, wasi);
         let module = Module::from_file(&engine, &path)
@@ -84,7 +88,7 @@ impl FomiTool for WasmPlugin {
     }
 
     fn parameters_schema(&self) -> Value {
-        serde_json::json!({})
+        self.manifest.schema()
     }
 
     fn execute(&self, args: Value) -> Result<String, String> {

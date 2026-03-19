@@ -15,6 +15,7 @@ pub struct PluginManifest {
     entry_point: PathBuf,
     api_version: String,
     permissions: Vec<Permission>,
+    parameters_schema: serde_json::Value,
 }
 
 
@@ -30,6 +31,7 @@ impl PluginManifest {
             permissions: Vec::new(),
             api_version: String::from("1.0"),
             entry_point: PathBuf::new(),
+            parameters_schema: serde_json::json!({}),
         }
     }
 
@@ -84,6 +86,10 @@ impl PluginManifest {
 
     pub fn permissions(&self) -> Vec<Permission> {
         self.permissions.clone()
+    }
+
+    pub fn schema(&self) -> serde_json::Value {
+        self.parameters_schema.clone()
     }
 
     pub fn add_permission(&mut self, permission: Permission) -> Result<(), String> {

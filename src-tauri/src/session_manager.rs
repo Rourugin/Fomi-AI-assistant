@@ -55,12 +55,13 @@ impl SessionManager {
             format!("You have the following information from your long-term memory:\n{}\n", memories.join("\n"))
         };
 
+        let united_system = format!("{}\n{}\n{}", system_prompt, context_block, prompt_prefix);
+
         let full_prompt = format!(
-            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{}{}<|eot_id|>\n\
+            "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n{}<|eot_id|>\n\
             <|start_header_id|>user<|end_header_id|>\n{}<|eot_id|>\n\
-            <|start_header_id|>tools and plugins<|end_header_id|>\n{}<|eot_id|>\n\
             <|start_header_id|>assistant<|end_header_id|>\n",
-            system_prompt, context_block, text, prompt_prefix
+            united_system, text
         );
 
         let max_steps= 5u8;
@@ -155,7 +156,7 @@ impl SessionManager {
                     Ok(result) => result,
                     Err(e) => e,
                 };
-                println!("[DEBUG] Плагин вернул: {}", result_text);
+                println!("Plugin returned: {}", result_text);
                 prompt_part = format!("<|eot_id|>\n<|start_header_id|>user<|end_header_id|>\n[SYSTEM UPDATE]: The requested tool executed successfully. Result data:\n{}\n\nBased on this data, please answer my previous request naturally.<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", result_text);
             } else if let CheckResult::Denied(reason) = check_result {
                 prompt_part = format!("<|start_header_id|>system<|end_header_id|>\nPermission Denied: {}<|eot_id|>\n<|start_header_id|>assistant<|end_header_id|>\n", reason);

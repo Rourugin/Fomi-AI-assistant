@@ -103,6 +103,11 @@ impl AiSession {
                 let token_str = fields.model_handle
                     .token_to_str(next_token, Special::Plaintext)
                     .unwrap_or(String::new());
+
+                if fields.model_handle.token_eos() == next_token || token_str.contains("<|eot_id|>") || token_str.contains("<|end_of_text|>") {
+                    break;
+                }
+
                 response_text.push_str(&token_str);
                 batch.clear();
                 let pos = fields.history.len() as i32;
