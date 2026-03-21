@@ -6,6 +6,7 @@ pub mod ai_engine;
 pub mod memory;
 mod commands;
 mod settings;
+mod audio;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]

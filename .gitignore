@@ -25,5 +25,6 @@ dist-ssr
 
 
 src-turi/target/*
-models/*
+models/model.gguf
+models/embedder_model.gguf
 promotion_strategy.md
