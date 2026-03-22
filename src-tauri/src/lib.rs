@@ -1,5 +1,7 @@
 use std::{env, fs};
 use tauri::Manager;
+
+use crate::plugin_system::manager;
 pub mod plugin_system;
 mod session_manager;
 pub mod ai_engine;
@@ -20,6 +22,13 @@ pub fn run() {
                 .join("models")
                 .join("model.gguf");
             let app_config_dir = app.path().app_config_dir()?;
+            let whisper_path = model_path
+                .clone()
+                .parent()
+                .expect("Failed to get parent directory")
+                .join("voice")
+                .join("stt")
+                .join("whisper.bin");
 
             if !app_config_dir.exists() {
                 std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
@@ -66,6 +75,17 @@ pub fn run() {
                         Err(e) => {
                             eprintln!("Failed to init memory: {}", e);
                             panic!("Memory init failed: {}", e);
+                        }
+                    }
+
+                    match audio::stt::SttEngine::new(whisper_path) {
+                        Ok(manager) => {
+                            println!("Whisper Engine created");
+                            app.manage(manager);
+                        }
+                        Err(e) => {
+                            eprintln!("Failed to init Whisper: {}", e);
+                            println!("Whisper init failed: {}", e);
                         }
                     }
                 }

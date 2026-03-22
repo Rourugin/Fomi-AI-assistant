@@ -92,9 +92,11 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
     ```bash
     git clone [https://github.com/Rourugin/Fomi-AI-assistant.git](https://github.com/Rourugin/Fomi-AI-assistant.git)
     ```
-2.  **Download the Brain**
-    * Get `Llama-3.2-3B-Instruct-Q4_K_M.gguf`.
-    * Place it in `./models/model.gguf`.
+2.  **Download the Brain & Senses**
+    * **LLM:** Get `dolphin-2.2.1-mistral-7b.gguf` (or your preferred GGUF model) and place it in `./models/model.gguf`.
+    * **Embedder:** The system uses `all-MiniLM-L6-v2` for FastEmbed vector memory. Ensure it is placed in `./models/embedder_model.gguf`.
+    * **STT (Hearing):** Download a Whisper model (e.g., `ggml-base.bin`) and place it in `./models/voice/stt/whisper.bin`.
+    * **TTS (Speech):** Download a Piper ONNX model (e.g., `en_US-amy-medium.onnx` + its `.json` config) and place it in `./models/voice/tts/`.
 3.  **Run Development Build**
     ```bash
     cargo tauri dev

@@ -10,8 +10,12 @@ Thank you for your interest in Fomi AI! We are building a private, modular, and 
 ## How to Get Started
 1. **Fork the Repository:** Create your own copy of the project.
 2. **Setup Environment:** - Install Rust and Cargo.
-   - Install Node.js (if needed for future tools).
-   - Place a GGUF model (e.g., Llama 3.2 3B) in the `models/` directory.
+   - Install Node.js (if needed for frontend dependencies).
+   - Prepare the `models/` directory with the required files:
+     - `models/model.gguf` (Core LLM, e.g., Mistral 7B).
+     - `models/embedder_model.gguf` (FastEmbed `all-MiniLM-L6-v2`).
+     - `models/voice/stt/whisper.bin` (Whisper STT).
+     - `models/voice/tts/*.onnx` and `*.json` (Piper TTS).
 3. **Run in Dev Mode:**
    ```bash
    cargo tauri dev
