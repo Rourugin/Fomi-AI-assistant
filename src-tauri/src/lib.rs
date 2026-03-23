@@ -1,14 +1,12 @@
-use std::{env, fs};
-use tauri::Manager;
-
-use crate::plugin_system::manager;
+use std::{env, fs, sync::Arc};
 pub mod plugin_system;
 mod session_manager;
+use tauri::Manager;
 pub mod ai_engine;
 pub mod memory;
+pub mod audio;
 mod commands;
 mod settings;
-mod audio;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -79,7 +77,8 @@ pub fn run() {
                     }
 
                     match audio::stt::SttEngine::new(whisper_path) {
-                        Ok(manager) => {
+                        Ok(whisper) => {
+                            let manager = Arc::new(whisper);
                             println!("Whisper Engine created");
                             app.manage(manager);
                         }
@@ -110,7 +109,8 @@ pub fn run() {
             commands::general::toggle_dashboard,
             commands::general::quit_app,
             commands::plugins::get_active_plugins, 
-            commands::plugins::install_plugin])
+            commands::plugins::install_plugin,
+            commands::audio::process_voice_input])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

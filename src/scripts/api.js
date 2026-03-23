@@ -11,3 +11,5 @@ export const getActivePersonality = () => invoke('get_active_personality');
 
 export const toggleDashboard = () => invoke('toggle_dashboard');
 export const quitApp = () => invoke('quit_app');
+
+export const processVoiceInput = (audio_bytes) => invoke('process_voice_input', { audioBytes: audio_bytes });
