@@ -40,5 +40,5 @@ ort = { version = "2.0.0-rc.11", default-features = false, features = ["load-dyn
 wasmtime = "42.0.1"
 wasi-common = "42.0.1"
 iana-time-zone = "0.1.65"
-whisper-rs = "0.16"
 hound = "3.5"
+tauri-plugin-shell = "2"

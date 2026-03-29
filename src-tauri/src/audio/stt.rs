@@ -1,64 +1,39 @@
-use whisper_rs::{WhisperContext, WhisperContextParameters, FullParams, SamplingStrategy};
-use hound::{WavReader, SampleFormat, Error};
-use std::{path::PathBuf, io::Cursor};
+use std::{env, error::Error, os::raw, path::PathBuf};
+use tauri_plugin_shell::ShellExt;
+use tauri::AppHandle;
+
 
 pub struct SttEngine {
-    context: WhisperContext,
+    model_path: PathBuf,
 }
 
 impl SttEngine {
-    pub fn new(path: PathBuf) -> Result<SttEngine, String> {
-        let params = WhisperContextParameters::default();
-        let context = WhisperContext::new_with_params(path, params).map_err(|e| e.to_string())?;
+    pub fn new(path: PathBuf) -> Result<SttEngine, Box<dyn Error>> {
         Ok(SttEngine {
-            context
+            model_path: path
         })
     }
 
-    pub fn transcribe_wav(&self, wav_bytes: &[u8]) -> Result<String, String> {
-        let cursor = Cursor::new(wav_bytes);
-        let mut reader = WavReader::new(cursor).unwrap();
+    pub async fn recognize_via_sidecar(&self, app_handle: AppHandle, wav_bytes: &[u8]) -> Result<String, Box<dyn Error>> {
+        let temp_dir = env::temp_dir();
+        let file_path = temp_dir.join("fomi_input_audio.wav");
 
-        let spec = reader.spec();
-        if spec.bits_per_sample != 16 || spec.sample_format != SampleFormat::Int {
-            return Err(format!("{}", Error::Unsupported))
-        }
+        tokio::fs::write(&file_path, wav_bytes).await?;
 
-        let mut audio_samples = Vec::new();
+        let command = app_handle
+            .shell()
+            .sidecar("whisper-whisper-cli")?
+            .args(["-m", self.model_path.to_str().ok_or("Converting model path to str error")?])
+            .args(["-f", file_path.to_str().ok_or("Converting file path to str error")?])
+            .args(["-nt", "1"])
+            .args(["-nc"]);
 
-        for sample in reader.samples::<i16>() {
-            let sample_i16 = sample.unwrap();
-            let sample_f32 = sample_i16 as f32 / 32768.0;
-            audio_samples.push(sample_f32);
-        }
+        let result = command.output().await?;
 
-        let mut params = FullParams::new(SamplingStrategy::Greedy { best_of: 1 });
+        let raw_text = String::from_utf8(result.stdout)?;
 
-        params.set_language(Some("en"));
-        params.set_print_progress(false);
-        params.set_print_realtime(false);
-        params.set_print_special(false);
-        params.set_print_timestamps(false);
-        params.set_n_threads(1);
+        tokio::fs::remove_file(&file_path).await?;
 
-        let mut state = self.context.create_state().unwrap();
-        state.full(params, &audio_samples).unwrap();
-
-        let mut result_text = String::new();
-        let n_segments = state.full_n_segments();
-
-        for i in 0..n_segments {
-            if let Some(segment) = state.get_segment(i) {
-                let segment_text = segment.to_str().unwrap();
-                if !segment_text.is_empty() {
-                    if !result_text.is_empty() {
-                        result_text.push(' ');
-                    }
-                    result_text.push_str(segment_text);
-                }
-            }
-        }
-
-        Ok(result_text)
+        Ok(raw_text.trim().to_string())
     }
 }

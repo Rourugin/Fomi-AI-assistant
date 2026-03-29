@@ -1,3 +1,4 @@
+import * as audioHandler from './audio_handler.js';
 import * as api from './api.js';
 import * as ui from './ui.js';
 
@@ -6,6 +7,8 @@ const dashInput = document.getElementById('chat-input');
 const dashSendBtn = document.getElementById('send-btn');
 const personalityContainer = document.getElementById('personality-container');
 const closeBtn = document.getElementById('btn-close-dash');
+
+const micBtn = document.getElementById('mic-btn');
 
 let isThink = false;
 let currentPersonality = await api.getActivePersonality();
@@ -75,6 +78,21 @@ document.addEventListener('keydown', (event) => {
     closeBtn.click();
   }
 });
+
+micBtn.addEventListener('mousedown', async () => {
+  micBtn.style.color = 'red';
+  await audioHandler.startRecording();
+});
+
+micBtn.addEventListener('mouseup', async () => {
+  micBtn.style.color = '';
+  const wavBytes = await audioHandler.stopRecording();
+
+  if (wavBytes && wavBytes.length > 0) {
+    const recognizedText = await api.processVoiceInput(wavBytes);
+    dashInput.value = recognizedText;
+  }
+})
 
 
 async function loadPersonalities() {

@@ -55,6 +55,9 @@
     "resources": [
       "assets/**/*",
       "dlls/onnxruntime.dll"
+    ],
+    "externalBin": [
+      "binaries/whisper-cli"
     ]
   }
 }

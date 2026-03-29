@@ -1,6 +1,3 @@
-import * as api from './api.js';
-
-
 let audioContext = null;
 let mediaStream = null;
 let processorNode = null;
@@ -8,7 +5,7 @@ let inputNode = null
 let audioChunks = [];
 
 
-async function startRecording() {
+export async function startRecording() {
     audioChunks = [];
     try {
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -37,7 +34,7 @@ async function startRecording() {
     }
 }
 
-async function stopRecording() {
+export async function stopRecording() {
     if (processorNode === null || inputNode === null) {
         return null;
     }
