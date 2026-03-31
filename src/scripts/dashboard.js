@@ -11,6 +11,7 @@ const closeBtn = document.getElementById('btn-close-dash');
 const micBtn = document.getElementById('mic-btn');
 
 let isThink = false;
+let isRecording = false;
 let currentPersonality = await api.getActivePersonality();
 loadPersonalities();
 InitNavigation();
@@ -79,20 +80,20 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-micBtn.addEventListener('mousedown', async () => {
-  micBtn.style.color = 'red';
-  await audioHandler.startRecording();
-});
-
-micBtn.addEventListener('mouseup', async () => {
-  micBtn.style.color = '';
-  const wavBytes = await audioHandler.stopRecording();
-
-  if (wavBytes && wavBytes.length > 0) {
-    const recognizedText = await api.processVoiceInput(wavBytes);
-    dashInput.value = recognizedText;
+micBtn.addEventListener('toggle', async () => {
+  if (!isRecording) {
+    isRecording = true;
+    micBtn.title = 'Stop';
+    await audioHandler.startRecording();
+  } else if (isRecording) {
+    let result = await audioHandler.stopRecording();
+    isRecording = false;
+    micBtn.title = 'Speak';
+    if (result) {
+      await api.processVoiceInput(result);
+    }
   }
-})
+});
 
 
 async function loadPersonalities() {

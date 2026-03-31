@@ -10,15 +10,15 @@ export async function startRecording() {
     try {
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioContext = new AudioContext({ sampleRate: 16000 });
+        await audioContext.audioWorklet.addModule('./processor.js');
         inputNode = audioContext.createMediaStreamSource(mediaStream);
-        processorNode = audioContext.createScriptProcessor(4096, 1, 1);
+        processorNode = new AudioWorkletNode(audioContext, 'recorder-worklet');
         audioChunks = [];
 
         inputNode.connect(processorNode);
-        processorNode.connect(audioContext.destination);
 
-        processorNode.onaudioprocess = (event) => {
-            const pcm = event.inputBuffer.getChannelData(0);
+        processorNode.port.onmessage = (event) => {
+            const pcm = event.data;
             audioChunks.push(new Float32Array(pcm));
         };
 
