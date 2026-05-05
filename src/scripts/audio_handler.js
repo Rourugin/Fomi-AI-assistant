@@ -10,7 +10,7 @@ export async function startRecording() {
     try {
         mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioContext = new AudioContext({ sampleRate: 16000 });
-        await audioContext.audioWorklet.addModule('./processor.js');
+        await audioContext.audioWorklet.addModule('./scripts/processor.js');
         inputNode = audioContext.createMediaStreamSource(mediaStream);
         processorNode = new AudioWorkletNode(audioContext, 'recorder-worklet');
         audioChunks = [];

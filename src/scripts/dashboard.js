@@ -80,17 +80,18 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-micBtn.addEventListener('toggle', async () => {
+micBtn.addEventListener('click', async () => {
   if (!isRecording) {
     isRecording = true;
-    micBtn.title = 'Stop';
+    micBtn.textContent = 'Stop';
     await audioHandler.startRecording();
   } else if (isRecording) {
     let result = await audioHandler.stopRecording();
     isRecording = false;
-    micBtn.title = 'Speak';
+    micBtn.textContent = 'Speak';
     if (result) {
-      await api.processVoiceInput(result);
+      dashInput.value = await api.processVoiceInput(result);
+      dashSendBtn.click();
     }
   }
 });

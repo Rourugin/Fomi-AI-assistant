@@ -42,3 +42,9 @@ wasi-common = "42.0.1"
 iana-time-zone = "0.1.65"
 hound = "3.5"
 tauri-plugin-shell = "2"
+
+[profile.dev]
+debug = 1 
+
+[profile.dev.package."*"]
+debug = 0
