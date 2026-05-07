@@ -97,11 +97,13 @@ impl SessionManager {
             eprint!("Failed to save user memory: {}", e);
         }
 
-        if let Err(e) = self.memory.ingest(&final_answer, "assistant").await {
+        let cleaned_answer = clean_special_tokens(&final_answer);
+
+        if let Err(e) = self.memory.ingest(&cleaned_answer, "assistant").await {
             eprint!("Failed to save assistant memory: {}", e);
         }
 
-        Ok(final_answer)
+        Ok(cleaned_answer)
     }
 
     fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
@@ -220,6 +222,20 @@ struct ToolCallRequest {
     args: serde_json::Value,
 }
 
+fn clean_special_tokens(text: &str) -> String {
+    let mut cleaned = String::new();
+    let mut chars = text.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if ch == '<' && chars.peek() == Some(&'|') {
+            // stop at the first special token marker; any following dialogue is not part of the assistant answer
+            break;
+        }
+        cleaned.push(ch);
+    }
+
+    cleaned.trim().to_string()
+}
 
 fn parse_tool_call(text: &str) -> Option<ToolCallRequest> {
     let start = text.find("{")?;

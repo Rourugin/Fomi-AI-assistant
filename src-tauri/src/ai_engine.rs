@@ -104,7 +104,13 @@ impl AiSession {
                     .token_to_str(next_token, Special::Plaintext)
                     .unwrap_or(String::new());
 
-                if fields.model_handle.token_eos() == next_token || token_str.contains("<|eot_id|>") || token_str.contains("<|end_of_text|>") {
+                if fields.model_handle.token_eos() == next_token
+                    || token_str.contains("<|eot_id|>")
+                    || token_str.contains("<|end_of_text|>")
+                    || token_str.contains("<|start_header_id|>")
+                    || token_str.contains("<|end_header_id|>")
+                    || token_str.contains("<|begin_of_text|>")
+                {
                     break;
                 }
 
