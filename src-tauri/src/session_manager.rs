@@ -226,12 +226,11 @@ fn clean_special_tokens(text: &str) -> String {
     let mut cleaned = String::new();
     let mut chars = text.chars().peekable();
 
-    while let Some(ch) = chars.next() {
-        if ch == '<' && chars.peek() == Some(&'|') {
-            // stop at the first special token marker; any following dialogue is not part of the assistant answer
+    while let Some(c) = chars.next() {
+        if c == '<' && chars.peek() == Some(&'|') {
             break;
         }
-        cleaned.push(ch);
+        cleaned.push(c);
     }
 
     cleaned.trim().to_string()

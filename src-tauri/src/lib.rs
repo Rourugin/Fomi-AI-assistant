@@ -111,7 +111,8 @@ pub fn run() {
             commands::general::quit_app,
             commands::plugins::get_active_plugins, 
             commands::plugins::install_plugin,
-            commands::audio::process_voice_input])
+            commands::audio::process_voice_input,
+            commands::audio::generate_audio])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

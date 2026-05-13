@@ -57,7 +57,8 @@
       "dlls/**/*"
     ],
     "externalBin": [
-      "binaries/whisper-cli"
+      "binaries/whisper-cli",
+      "binaries/piper"
     ]
   }
 }
