@@ -35,7 +35,7 @@ export const showSubtitle = async (text) => {
   subtitleBox.classList.remove('hidden');
   subtitleText.innerHTML = "";
   subtitleText.textContent = "";
-  setAvatarState('talk');
+  //setAvatarState('talk');
 
   for (let i = 0; i < cleanText.length; i++) {
     answer += cleanText[i];
@@ -47,7 +47,7 @@ export const showSubtitle = async (text) => {
   subtitleText.innerHTML = marked.parse(cleanText);
   await new Promise(r => setTimeout(r, 150));
 
-  setAvatarState('idle');
+  //setAvatarState('idle');
   setTimeout(() => {
     subtitleBox.classList.add('hidden');
   }, 5000);

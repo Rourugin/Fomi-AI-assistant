@@ -10,7 +10,8 @@ const closeBtn = document.getElementById('btn-close-dash');
 
 const micBtn = document.getElementById('mic-btn');
 
-let isThink = false;
+const emit = window.__TAURI__.event?.emit;
+
 let isRecording = false;
 let currentPersonality = await api.getActivePersonality();
 loadPersonalities();
@@ -24,7 +25,7 @@ dashSendBtn.addEventListener('click', async () => {
   }
 
   dashInput.value = '';
-  await thinkInput(text);
+  await emit('fomi-think-request', text);
 });
 
 dashInput.addEventListener('keydown', (event) => {
@@ -108,23 +109,6 @@ async function loadPersonalities() {
   names.sort();
   names.unshift('standard');
   await ui.showPersonalities(names, currentPersonality);
-}
-
-async function thinkInput(text) {
-  if (isThink) {
-    return
-  };
-  isThink = true;
-  await api.setFomiAvatarState('think');
-
-  try {
-    await api.fomiThink(text);
-  } catch (e) {
-    console.error(e);
-  } finally {
-    isThink = false;
-    ui.setAvatarState('idle');
-  }
 }
 
 function InitNavigation() {

@@ -23,13 +23,9 @@ pub async fn set_fomi_avatar_state(app: tauri::AppHandle, state: String) -> Resu
 }
 
 #[tauri::command]
-pub async fn fomi_think(app: tauri::AppHandle, state: tauri::State<'_, session_manager::SessionManager>, text: String) -> Result<String, String> {
+pub async fn fomi_think(state: tauri::State<'_, session_manager::SessionManager>, text: String) -> Result<String, String> {
     let response = state.think(&text).await.map_err(|e| e.to_string())?;
-
-    if let Some(main_window) = app.get_webview_window("main") {
-        let _ = main_window.emit("show-subtitle", &response);
-    }
-
+    //main.js:161 state not managed for field `state` on command `generate_audio`. You must call `.manage()` before using this command
     Ok(response)
 }
 

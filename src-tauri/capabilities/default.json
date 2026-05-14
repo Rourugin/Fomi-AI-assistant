@@ -2,13 +2,14 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": ["main", "dashboard"],
   "permissions": [
     "core:default",
     "core:window:allow-close",
     "opener:default",
     "shell:default",
-    "shell:allow-execute"
+    "shell:allow-execute",
+    "core:event:allow-emit"
   ],
   "commands": {
     "allow": [

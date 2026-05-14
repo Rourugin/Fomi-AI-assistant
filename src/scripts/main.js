@@ -7,6 +7,7 @@ const contextMenu = document.getElementById('context-menu');
 
 const listen = window.__TAURI__.event?.listen;
 
+let isThink = false;
 let isDragging = false;
 let isInterfaceLocked = false;
 let offsetX = 0;
@@ -143,3 +144,45 @@ async function askUserToWipeMemory() {
     };
   });
 }
+
+async function fomiThinking(text) {
+  if (isThink) {
+    return
+  };
+  isThink = true;
+  await api.setFomiAvatarState('think');
+
+  try {
+    const response = await api.fomiThink(text);
+    const audioData = await api.generateAudio(response);
+    ui.showSubtitle(response);
+    await playAudio(audioData);
+  } catch (e) {
+    console.error(e);
+  } finally {
+    isThink = false;
+    ui.setAvatarState('idle');
+  }
+}
+
+async function playAudio(bytes) {
+  const blob = new Blob([new Uint8Array(bytes)], { type: 'audio/wav' });
+  const url = URL.createObjectURL(blob);
+  const audio = new Audio(url);
+
+  return new Promise((resolve) => {
+    audio.onended = () => {
+      ui.setAvatarState('idle');
+      URL.revokeObjectURL(url);
+      resolve()
+    };
+    ui.setAvatarState('talk');
+    audio.play().catch(e => console.error("Playback failed: ", e));
+  });
+}
+
+
+listen('fomi-think-request', async (event) => {
+  const text = event.payload;
+  await fomiThinking(text);
+});
