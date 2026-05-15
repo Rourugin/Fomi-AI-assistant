@@ -97,6 +97,7 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
     * **Embedder:** The system uses `all-MiniLM-L6-v2` for FastEmbed vector memory. Ensure it is placed in `./models/embedder_model.gguf`.
     * **STT (Hearing):** Download a Whisper model (e.g., `ggml-base.bin`) and place it in `./models/voice/stt/whisper.bin`.
     * **TTS (Speech):** Download a Piper ONNX model (e.g., `en_US-amy-medium.onnx` + its `.json` config) and place it in `./models/voice/tts/`.
+    * **Important**: Ensure that all Piper-related DLLs (if on Windows) are placed in the same folder as the piper executable.
 3.  **Run Development Build**
     ```bash
     cargo tauri dev
@@ -111,6 +112,19 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
 - [x] **Phase 3: Deep Roots** (Long-term Memory, Vector DB, Advanced Personalities)
 - [x] **Phase 4: The Hub** (Dashboard overhaul, Multi-window UI)
 - [ ] **Phase 5: The Body** (Connecting AI to Plugins & System Controls)
+
+---
+
+## ⚠️ Project Status: Early Alpha
+Fomi is currently in active development. The current version is a "functional skeleton":
+
+- Core AI and memory systems are implemented.
+
+- TTS/STT via sidecars is operational.
+
+- Note: Some features like the Plugin Manager are architectural placeholders for future expansion.
+
+- Assets: Character visuals are currently static and will be replaced with animated models.
 
 ---
 

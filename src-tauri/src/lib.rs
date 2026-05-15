@@ -1,3 +1,20 @@
+// Fomi AI Assistant - Десктопный ИИ-ассистент
+// Copyright (C) 2026 Maksim Fomin (Rourugin/Makss Mef)
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 use std::{env, fs, sync::Arc};
 pub mod plugin_system;
 mod session_manager;
@@ -27,6 +44,20 @@ pub fn run() {
                 .join("voice")
                 .join("stt")
                 .join("whisper.bin");
+            let tts_path = whisper_path
+                .clone()
+                .parent()
+                .expect("Failed to get parent directory")
+                .parent()
+                .expect("Failed to get parent directory")
+                .join("tts")
+                .join("en_US-amy-medium.onnx");
+            let tts_exe_path = tts_path
+                .clone()
+                .parent()
+                .expect("Failed to get parent directory")
+                .join("piper-engine")
+                .join("piper.exe");
 
             if !app_config_dir.exists() {
                 std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");
@@ -85,6 +116,18 @@ pub fn run() {
                         Err(e) => {
                             eprintln!("Failed to init Whisper: {}", e);
                             println!("Whisper init failed: {}", e);
+                        }
+                    }
+
+                    match audio::tts::TtsEngine::new(tts_path, tts_exe_path) {
+                        Ok(tts_engine) => {
+                            let manager = Arc::new(tts_engine);
+                            println!("TTS Engine created");
+                            app.manage(manager);
+                        }
+                        Err(e) => {
+                            eprintln!("Failed to init TTS Engine: {}", e);
+                            println!("TTS Engine init failed: {}", e);
                         }
                     }
                 }
