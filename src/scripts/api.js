@@ -14,3 +14,6 @@ export const quitApp = () => invoke('quit_app');
 
 export const processVoiceInput = (audio_bytes) => invoke('process_voice_input', { audioBytes: audio_bytes });
 export const generateAudio = (text) => invoke('generate_audio', { text });
+
+export const sysInfo = await invoke('get_system_info');
+export const deps = await invoke('check_setup_complete');
