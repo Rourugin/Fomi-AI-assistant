@@ -1,18 +1,22 @@
 import * as api from './api.js';
 
-const invoke = window.__TAURI__.core.invoke;
+
+const { getCurrentWindow } = window.__TAURI__.window;
 
 
 async function checkSystem() {
     try {
-        document.getElementById('free-space').innerText = `${api.sysInfo.free_space_gb.toFixed(2)} GB`;
-        document.getElementById('total-ram').innerText = `${api.sysInfo.total_ram_gb.toFixed(2)} GB`;
+        const sysInfo = await api.getSysInfo();
+        const deps = await api.getDeps();
 
-        updateStatus('m-main', api.deps.has_main_model);
-        updateStatus('m-embed', api.deps.has_embedder_model);
-        updateStatus('m-whisper', api.deps.has_whisper);
-        updateStatus('m-piper', api.deps.has_piper);
-        updateStatus('m-voice', api.deps.has_voiceover && api.deps.has_voiceover_json);
+        document.getElementById('free-space').innerText = `${sysInfo.free_space_gb.toFixed(2)} GB`;
+        document.getElementById('total-ram').innerText = `${sysInfo.total_ram_gb.toFixed(2)} GB`;
+
+        updateStatus('m-main', deps.has_main_model);
+        updateStatus('m-embed', deps.has_embedder_model);
+        updateStatus('m-whisper', deps.has_whisper);
+        updateStatus('m-piper', deps.has_piper);
+        updateStatus('m-voice', deps.has_voiceover && deps.has_voiceover_json);
 
     } catch (err) {
         console.error("Calling Tauri command error:", err);
@@ -30,5 +34,21 @@ function updateStatus(elementId, isReady) {
     }
 }
 
+async function InitWindow() {
+    const appWindow = getCurrentWindow();
 
-window.addEventListener('DOMContentLoaded', checkSystem);
+    const unlisten = await appWindow.onCloseRequested(async (event) => {
+        const confirmed = await confirm('Are you sure you want to close?');
+
+        if (confirmed) {
+            event.preventDefault();
+            await api.quitApp();
+        }
+    });
+}
+
+
+window.addEventListener('DOMContentLoaded', () => {
+    checkSystem();
+    InitWindow();
+});

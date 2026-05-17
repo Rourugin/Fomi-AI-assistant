@@ -43,7 +43,7 @@ iana-time-zone = "0.1.65"
 hound = "3.5"
 tauri-plugin-shell = "2"
 reqwest = "0.13.3"
-sysinfo = "0.39.1"
+sysinfo = "0.38"
 futures-util = "0.3"
 
 [profile.dev]

@@ -26,11 +26,9 @@ impl SystemDependencies {
             .path()
             .app_data_dir()
             .expect("Failed to get app data directory")
-            .parent()
-            .expect("Failed to get parent directory")
             .join("models");
 
-        let mut has_main_model = model_dir
+        let has_main_model = model_dir
             .join("model.gguf")
             .exists();
 
@@ -62,6 +60,14 @@ impl SystemDependencies {
             .join("tts")
             .join("voice.onnx.json")
             .exists();
+
+        println!("Model dir path: {}", model_dir.to_str().unwrap());
+        println!("Main model exists: {}", has_main_model);
+        println!("Embedder exists: {}", has_embedder_model);
+        println!("whisper exists: {}", has_whisper);
+        println!("Piper exists: {}", has_piper);
+        println!("Voice exists: {}", has_voiceover);
+        println!("Voice exists json: {}", has_voiceover_json);
 
         Ok(SystemDependencies {
             has_main_model,
@@ -106,6 +112,6 @@ pub fn get_system_info() -> SystemStatus {
 
 #[tauri::command]
 pub async fn check_setup_complete(app: tauri::AppHandle) -> SystemDependencies {
-    let dependencies = SystemDependencies::new(app)?;
+    let dependencies = SystemDependencies::new(app).expect("Error creating with system dependencies");
     return dependencies;
 }

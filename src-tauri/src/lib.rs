@@ -31,18 +31,16 @@ mod settings;
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let deps = setup_manager::SystemDependencies::new(app.handle())?;
+            let deps = setup_manager::SystemDependencies::new(app.handle().clone()).expect("Error creating with system dependencies");
             let app_config_dir = app
                 .path()
-                .app_config_dir()
+                .app_data_dir()
                 .expect("Failed to get app data directory");
 
             if deps.is_all_ready() {
                 println!("All models are founded, start the core");
 
                 let model_path = app_config_dir
-                    .parent()
-                    .expect("Failed to get parent directory")
                     .join("models")
                     .join("model.gguf");
                 let whisper_path = model_path
@@ -59,7 +57,7 @@ pub fn run() {
                     .parent()
                     .expect("Failed to get parent directory")
                     .join("tts")
-                    .join("en_US-amy-medium.onnx");
+                    .join("voice.onnx");
                 let tts_exe_path = tts_path
                     .clone()
                     .parent()
