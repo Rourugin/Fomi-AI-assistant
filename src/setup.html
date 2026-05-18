@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fomi's Installer</title>
+    <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/setup.css">
     <script type="module" src="/scripts/setup.js" defer></script>
 </head>
@@ -25,16 +26,54 @@
 
         <h3>AI Components checking:</h3>
         <div class="deps-list" id="deps-container">
-            <div class="dep-item"><span>Large Language Model (model.gguf)</span><span class="status-badge" id="m-main">Checking...</span></div>
-            <div class="dep-item"><span>Embedder Model (embedder_model.gguf)</span><span class="status-badge" id="m-embed">Checking...</span></div>
-            <div class="dep-item"><span>Whisper Engine (Whisper)</span><span class="status-badge" id="m-whisper">Checkin...</span></div>
-            <div class="dep-item"><span>Speech synthesizer (Piper)</span><span class="status-badge" id="m-piper">Checking...</span></div>
-            <div class="dep-item"><span>Voice files (voice.onnx / json)</span><span class="status-badge" id="m-voice">Checking...</span></div>
+            <div class="dep-item">
+                <span>Large Language Model (model.gguf)</span>
+                <select name="llm" id="llm-selector" class="selector">
+                    <option value="Phi-3" class="option">Microsoft Phi-3-Mini-4K-Instruct (Q4_K_M)</option>
+                    <option value="Qwen-2.5-3B" class="option">Qwen 2.5 3B (Q4_K_M)</option>
+                    <option value="Llama-3-8B" class="option">Llama-3-8B-Instruct</option>
+                    <option value="Mistral-7B" class="option">Mistral-7B-Instruct-v0.3 (Q5_K_M)</option>
+                </select>
+                <button class="btn-install" id="llm-btn">Download</button>
+                <span class="status-badge" id="m-main">Checking...</span>
+            </div>
+            <div class="dep-item">
+                <span>Embedder Model (embedder_model.gguf)</span>
+                <select name="embedder" id="embedder-selector" class="selector">
+                    <option value="minilm" class="option">all-minilm-l6-v2</option>
+                </select>
+                <button class="btn-install" id="embedder-btn">Download</button>
+                <span class="status-badge" id="m-embed">Checking...</span>
+            </div>
+            <div class="dep-item">
+                <span>Whisper Engine (Whisper)</span> 
+                <select name="whisper" id="whisper-selector" class="selector">
+                    <option value="ggml-tiny" class="option">ggml-tiny.en.bin</option>
+                    <option value="ggml-base" class="option">ggml-base.en.bin</option>
+                    <option value="ggml-small" class="option">ggml-small.en.bin</option>
+                </select>
+                <button class="btn-install" id="whisper-btn">Download</button>
+                <span class="status-badge" id="m-whisper">Checkin...</span>
+            </div>
+            <div class="dep-item">
+                <span>Speech synthesizer (Piper)</span>
+                <select name="piper" id="piper-selector" class="selector">
+                    <option value="piper" class="option">Piper</option>
+                </select>
+                <button class="btn-install" id="piper-btn">Download</button>
+                <span class="status-badge" id="m-piper">Checking...</span>
+            </div>
+            <div class="dep-item">
+                <span>Voice files (voice.onnx / json)</span>
+                <select name="voiceover" id="voiceover-selector" class="selector">
+                    <option value="US-amy" class="option">en_US-amy-medium</option>
+                    <option value="US-libritts" class="option">en_US-libritts-high</option>
+                    <option value="GB-semaine" class="option">en_GB-semaine-medium</option>
+                </select>
+                <button class="btn-install" id="voiceover-btn">Download</button>
+                <span class="status-badge" id="m-voice">Checking...</span>
+            </div>
         </div>
-    </div>
-
-    <div class="actions">
-        <button class="btn-install" id="action-btn">Download missing files</button>
     </div>
 </body>
 </html>

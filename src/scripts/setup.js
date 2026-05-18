@@ -34,6 +34,35 @@ function updateStatus(elementId, isReady) {
     }
 }
 
+async function checkDownloadable() {
+    const deps = await api.getDeps();
+
+    if (deps.has_main_model){
+        document.getElementById('llm-selector').classList.add('hidden');
+        document.getElementById('llm-btn').classList.add('hidden');
+    }
+
+    if (deps.has_embedder_model){
+        document.getElementById('embedder-selector').classList.add('hidden');
+        document.getElementById('embedder-btn').classList.add('hidden');
+    }
+
+    if (deps.has_whisper){
+        document.getElementById('whisper-selector').classList.add('hidden');
+        document.getElementById('whisper-btn').classList.add('hidden');
+    }
+
+    if (deps.has_piper){
+        document.getElementById('piper-selector').classList.add('hidden');
+        document.getElementById('piper-btn').classList.add('hidden');
+    }
+
+    if (deps.has_voiceover && deps.has_voiceover_json){
+        document.getElementById('voiceover-selector').classList.add('hidden');
+        document.getElementById('voiceover-btn').classList.add('hidden');
+    }
+}
+
 async function InitWindow() {
     const appWindow = getCurrentWindow();
 
@@ -48,7 +77,8 @@ async function InitWindow() {
 }
 
 
-window.addEventListener('DOMContentLoaded', () => {
-    checkSystem();
+window.addEventListener('DOMContentLoaded', async () => {
+    await checkSystem();
+    await checkDownloadable();
     InitWindow();
 });
