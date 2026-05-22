@@ -17,7 +17,7 @@ pub async fn process_voice_input(state: State<'_, Arc<SttEngine>>, app_handle: A
 #[tauri::command]
 pub async fn generate_audio(state: State<'_, Arc<TtsEngine>>, app_handle: AppHandle, text: String) -> Result<Vec<u8>, String> {
     let engine = state.inner().clone();
-    let wav_bytes = TtsEngine::generate_audio(&engine, app_handle, text)
+    let wav_bytes = TtsEngine::generate_audio(&engine, text)
         .await
         .map_err(|e| e.to_string())?;
 

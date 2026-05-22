@@ -61,14 +61,6 @@ impl SystemDependencies {
             .join("voice.onnx.json")
             .exists();
 
-        println!("Model dir path: {}", model_dir.to_str().unwrap());
-        println!("Main model exists: {}", has_main_model);
-        println!("Embedder exists: {}", has_embedder_model);
-        println!("whisper exists: {}", has_whisper);
-        println!("Piper exists: {}", has_piper);
-        println!("Voice exists: {}", has_voiceover);
-        println!("Voice exists json: {}", has_voiceover_json);
-
         Ok(SystemDependencies {
             has_main_model,
             has_embedder_model,

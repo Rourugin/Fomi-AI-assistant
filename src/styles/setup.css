@@ -10,24 +10,38 @@
   --text-secondary: #a6adc8;
   --success: #a6e3a1;
   --danger: #f38ba8;
+  --bg-color: rgba(18, 18, 28, 0.95);
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --text-color: #e1e1e6;
+  --accent-color: #cba6f7;
 }
 
 body {
-    font-family: var(--font-main);
-    background-color: rgba(18, 18, 28, 0.95);
-    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     margin: 0;
-    padding: 30px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 60px);
-    justify-content: space-between;
+    min-height: calc(100vh - 48px);
+    justify-content: flex-start;
+    gap: 20px;
+    pointer-events: auto !important;
+    overflow-y: auto;
+    backdrop-filter: blur(12px);
 }
 
 h2, h3 { 
     margin-top: 0; 
     color: var(--accent);
     text-shadow: 0 0 10px var(--accent-glow);
+}
+
+.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .sys-info {
@@ -37,7 +51,7 @@ h2, h3 {
 }
 
 .info-card {
-    background: var(--bg-glass);
+    background: var(--card-bg) !important;
     padding: 15px 20px;
     border-radius: 12px;
     flex: 1;
@@ -59,7 +73,7 @@ h2, h3 {
 }
 
 .deps-list {
-    background: var(--bg-glass);
+    background: var(--card-bg) !important;
     border-radius: 12px;
     padding: 20px;
     border: 1px solid var(--border-glass);
@@ -77,7 +91,7 @@ h2, h3 {
     align-items: center;
     gap: 15px;
     padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.02) !important;
     border-radius: 10px;
     border: 1px solid transparent;
     transition: border-color 0.3s;

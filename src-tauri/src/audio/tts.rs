@@ -1,6 +1,4 @@
 use std::{env, error::Error, io::Write, path::PathBuf, process::{Command, Stdio}};
-use tauri_plugin_shell::{ShellExt, process::CommandEvent};
-use tauri::AppHandle;
 
 
 pub struct TtsEngine {
@@ -17,7 +15,7 @@ impl TtsEngine {
         })
     }
 
-    pub async fn generate_audio(&self, app_handle: AppHandle, text: String) -> Result<Vec<u8>, Box<dyn Error>> {
+    pub async fn generate_audio(&self, text: String) -> Result<Vec<u8>, Box<dyn Error>> {
         let wav_path = env::temp_dir().join("fomi_output.wav");
 
         let mut command = Command::new(self.exe_path.as_os_str());

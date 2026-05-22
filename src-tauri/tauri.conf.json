@@ -43,7 +43,7 @@
         "title": "Fomi's Installer",
         "width": 750,
         "height": 600,
-        "resizable": false,
+        "resizable": true,
         "transparent": true,
         "decorations": true,
         "visible": false,

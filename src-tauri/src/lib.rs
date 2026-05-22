@@ -141,6 +141,10 @@ pub fn run() {
                         eprintln!("Ai error: {}", e);
                     }
                 }
+
+                if let Some(main_window) = app.get_webview_window("main") {
+                    main_window.show().unwrap();
+                }
             } else {
                 println!("Models aren't founded. Start Installer");
 
