@@ -1,0 +1,86 @@
+{
+    "main_models": [
+        {
+            "value": "Phi-3",
+            "download_url": "",
+            "file_name": "model.gguf",
+            "folder_path": "models"
+        },
+        {
+            "value": "Qwen-2.5-3B",
+            "download_url": "",
+            "file_name": "model.gguf",
+            "folder_path": "models"
+        },
+        {
+            "value": "Llama-3-8B",
+            "download_url": "",
+            "file_name": "model.gguf",
+            "folder_path": "models"
+        },
+        {
+            "value": "Mistral-7B",
+            "download_url": "",
+            "file_name": "model.gguf",
+            "folder_path": "models"
+        }
+    ],
+    "embedder": {
+        "value": "minilm",
+        "download_url": "",
+        "file_name": "embedder_model.gguf",
+        "folder_path": "models"
+    },
+    "whisper": [
+        {
+            "value": "ggml-tiny",
+            "download_url": "",
+            "file_name": "whisper.bin",
+            "folder_path": "models/voice/stt"
+        },
+        {
+            "value": "ggml-base",
+            "download_url": "",
+            "file_name": "whisper.bin",
+            "folder_path": "models/voice/stt"
+        },
+        {
+            "value": "ggml-small",
+            "download_url": "",
+            "file_name": "whisper.bin",
+            "folder_path": "models/voice/stt"
+        }
+    ],
+    "piper": {
+        "value": "piper",
+        "download_url": "",
+        "folder_name": "piper.zip",
+        "folder_path": "models/voice/tts"
+    },
+    "voiceover": [
+        {
+            "value": "US-amy",
+            "download_url_onnx": "",
+            "download_url_json": "",
+            "file_name_onnx": "voice.onnx",
+            "file_name_json": "voice.onnx.json",
+            "folder_path": "models/voice/tts"
+        },
+        {
+            "value": "US-libritts",
+            "download_url_onnx": "",
+            "download_url_json": "",
+            "file_name_onnx": "voice.onnx",
+            "file_name_json": "voice.onnx.json",
+            "folder_path": "models/voice/tts"
+        },
+        {
+            "value": "GB-semaine",
+            "download_url_onnx": "",
+            "download_url_json": "",
+            "file_name_onnx": "voice.onnx",
+            "file_name_json": "voice.onnx.json",
+            "folder_path": "models/voice/tts"
+        }
+    ]
+}
