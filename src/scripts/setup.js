@@ -82,3 +82,33 @@ window.addEventListener('DOMContentLoaded', async () => {
     await checkDownloadable();
     InitWindow();
 });
+
+document.getElementById('llm-btn').addEventListener('click', async () => {
+    const model_id = document.getElementById('llm-selector').value;
+
+    await api.startDownload("llm", model_id);
+});
+
+document.getElementById('embedder-btn').addEventListener('click', async () => {
+    const model_id = document.getElementById('embedder-selector').value;
+
+    await api.startDownload("embedder", model_id);
+});
+
+document.getElementById('whisper-btn').addEventListener('click', async () => {
+    const model_id = document.getElementById('whisper-selector').value;
+
+    await api.startDownload("whisper", model_id);
+});
+
+document.getElementById('piper-btn').addEventListener('click', async () => {
+    const model_id = document.getElementById('piper-selector').value;
+
+    await api.startDownload("piper", model_id);
+});
+
+document.getElementById('voiceover-btn').addEventListener('click', async () => {
+    const model_id = document.getElementById('voiceover-selector').value;
+
+    await api.startDownload("voiceover", model_id);
+});

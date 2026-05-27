@@ -17,6 +17,7 @@
 
 use std::{env, fs, sync::Arc};
 pub mod plugin_system;
+mod download_manager;
 mod session_manager;
 use tauri::Manager;
 pub mod ai_engine;
@@ -174,7 +175,8 @@ pub fn run() {
             commands::audio::process_voice_input,
             commands::audio::generate_audio,
             setup_manager::get_system_info,
-            setup_manager::check_setup_complete])
+            setup_manager::check_setup_complete,
+            download_manager::start_download])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

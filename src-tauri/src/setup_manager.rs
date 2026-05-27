@@ -107,3 +107,5 @@ pub async fn check_setup_complete(app: tauri::AppHandle) -> SystemDependencies {
     let dependencies = SystemDependencies::new(app).expect("Error creating with system dependencies");
     return dependencies;
 }
+
+//https://raw.githubusercontent.com/Rourugin/Fomi-AI-assistant/refs/heads/main/src-tauri/models_registry.json
