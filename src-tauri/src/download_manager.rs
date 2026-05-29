@@ -1,4 +1,7 @@
+use ort::editor::Model;
 use serde::Deserialize;
+use std::{path::{Path, PathBuf}, result};
+use tauri::Manager;
 
 
 #[derive(Deserialize)]
@@ -85,7 +88,27 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
         }
     };
 
+    let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    match selected_model {
+        ModelSelection::Standard(model) => {
+            let save_path = app_data_dir.join(model.folder_path).join(model.file_name);
+
+            println!("Ready to download: {} here: {:?}", model.download_url, save_path);
+        },
+        ModelSelection::Voiceover(voiceover) => {
+            let save_path = app_data_dir.join(voiceover.folder_path);
+            let save_path_onnx = save_path.join(voiceover.file_name_onnx);
+            let save_path_json = save_path.join(voiceover.file_name_json);
+
+            println!("Ready to download: {} here: {:?}", voiceover.download_url_onnx, save_path_onnx);
+            println!("Ready to download: {} here: {:?}", voiceover.download_url_json, save_path_json);
+        },
+    }
+
+    Ok(())
+}
 
 
+async fn download_file(url: &str, save_path: &PathBuf) -> Result<(), String> {
     Ok(())
 }

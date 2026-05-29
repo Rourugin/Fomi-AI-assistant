@@ -17,4 +17,4 @@ export const generateAudio = (text) => invoke('generate_audio', { text });
 
 export const getSysInfo = () => invoke('get_system_info');
 export const getDeps = () => invoke('check_setup_complete');
-export const startDownload = (component_type, model_id) => invoke('start_download', { componentType, modelId });
+export const startDownload = (component_type, model_id) => invoke('start_download', { componentType: component_type, modelId: model_id });
