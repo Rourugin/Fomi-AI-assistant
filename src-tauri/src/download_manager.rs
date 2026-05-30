@@ -1,6 +1,6 @@
-use ort::editor::Model;
+use tokio::io::AsyncWriteExt;
 use serde::Deserialize;
-use std::{path::{Path, PathBuf}, result};
+use std::path::PathBuf;
 use tauri::Manager;
 
 
@@ -93,15 +93,15 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
         ModelSelection::Standard(model) => {
             let save_path = app_data_dir.join(model.folder_path).join(model.file_name);
 
-            println!("Ready to download: {} here: {:?}", model.download_url, save_path);
+            download_file(&model.download_url, &save_path).await.map_err(|e| e)?;
         },
         ModelSelection::Voiceover(voiceover) => {
             let save_path = app_data_dir.join(voiceover.folder_path);
             let save_path_onnx = save_path.join(voiceover.file_name_onnx);
             let save_path_json = save_path.join(voiceover.file_name_json);
 
-            println!("Ready to download: {} here: {:?}", voiceover.download_url_onnx, save_path_onnx);
-            println!("Ready to download: {} here: {:?}", voiceover.download_url_json, save_path_json);
+            download_file(&voiceover.download_url_onnx, &save_path_onnx).await.map_err(|e| e)?;
+            download_file(&voiceover.download_url_json, &save_path_json).await.map_err(|e| e)?;
         },
     }
 
@@ -110,5 +110,16 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
 
 
 async fn download_file(url: &str, save_path: &PathBuf) -> Result<(), String> {
+    let save_folder = save_path.parent().expect("Couldn't reach the parent directory of save path");
+
+    tokio::fs::create_dir_all(&save_folder).await.map_err(|e| e.to_string())?;
+
+    let mut response = reqwest::get(url).await.map_err(|e| e.to_string())?;
+    let mut file = tokio::fs::File::create(save_path).await.map_err(|e| e.to_string())?;
+
+    while let Some(chunk) = response.chunk().await.map_err(|e| e.to_string())? {
+        file.write_all(&chunk).await.map_err(|e| e.to_string())?;
+    }
+
     Ok(())
 }
