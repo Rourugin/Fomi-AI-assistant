@@ -42,12 +42,21 @@ impl SystemDependencies {
             .join("whisper.bin")
             .exists();
 
-        let has_piper = model_dir
+        let has_piper;
+
+        let piper_path = model_dir
             .join("voice")
             .join("tts")
-            .join("piper-engine")
-            .join("piper.exe")
-            .exists();
+            .join("piper-engine");
+
+        match std::env::consts::OS {
+            "windows" => {
+                has_piper = piper_path.join("piper.exe").exists();
+            },
+            _ => {
+                has_piper = piper_path.join("piper").exists();
+            },
+        }
 
         let has_voiceover = model_dir
             .join("voice")
@@ -107,5 +116,3 @@ pub async fn check_setup_complete(app: tauri::AppHandle) -> SystemDependencies {
     let dependencies = SystemDependencies::new(app).expect("Error creating with system dependencies");
     return dependencies;
 }
-
-//https://raw.githubusercontent.com/Rourugin/Fomi-AI-assistant/refs/heads/main/src-tauri/models_registry.json

@@ -53,8 +53,10 @@
     ],
     "piper": {
         "value": "piper",
-        "download_url": "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip",
-        "file_name": "piper.zip",
+        "download_url_windows": "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_windows_amd64.zip",
+        "download_url_linux": "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz",
+        "download_url_macos": "https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_macos_x64.tar.gz",
+        "file_name": "piper",
         "folder_path": "models/voice/tts"
     },
     "voiceover": [

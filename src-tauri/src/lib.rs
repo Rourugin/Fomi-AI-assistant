@@ -59,12 +59,20 @@ pub fn run() {
                     .expect("Failed to get parent directory")
                     .join("tts")
                     .join("voice.onnx");
-                let tts_exe_path = tts_path
+                let mut tts_exe_path = tts_path
                     .clone()
                     .parent()
                     .expect("Failed to get parent directory")
-                    .join("piper-engine")
-                    .join("piper.exe");
+                    .join("piper-engine");
+
+                match std::env::consts::OS {
+                    "windows" => {
+                        tts_exe_path = tts_exe_path.join("piper.exe");
+                    },
+                    _ => {
+                        tts_exe_path = tts_exe_path.join("piper");
+                    },
+                }
 
                 if !app_config_dir.exists() {
                     std::fs::create_dir_all(&app_config_dir).expect("failed to create config dir");

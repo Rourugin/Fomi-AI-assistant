@@ -7,6 +7,7 @@ use tauri::Manager;
 #[derive(Deserialize)]
 enum ModelSelection {
     Standard(StandardModel),
+    Piper(PiperModel),
     Voiceover(VoiceoverModel),
 }
 
@@ -16,7 +17,7 @@ struct FullRegistry {
     main_models: Vec<StandardModel>,
     embedder: StandardModel,
     whisper: Vec<StandardModel>,
-    piper: StandardModel,
+    piper: PiperModel,
     voiceover: Vec<VoiceoverModel>,
 }
 
@@ -24,6 +25,16 @@ struct FullRegistry {
 struct StandardModel {
     value: String,
     download_url: String,
+    file_name: String,
+    folder_path: String,
+}
+
+#[derive(Deserialize, Clone)]
+struct PiperModel {
+    value: String,
+    download_url_windows: String,
+    download_url_linux: String,
+    download_url_macos: String,
     file_name: String,
     folder_path: String,
 }
@@ -73,7 +84,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             }
         },
         "piper" => {
-            ModelSelection::Standard(registry.piper.clone())
+            ModelSelection::Piper(registry.piper.clone())
         },
         "voiceover" => {
             let found_voiceover = registry.voiceover.iter().find(|v| v.value == model_id);
@@ -94,6 +105,30 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             let save_path = app_data_dir.join(model.folder_path).join(model.file_name);
 
             download_file(&model.download_url, &save_path).await.map_err(|e| e)?;
+        },
+        ModelSelection::Piper(piper) => {
+            let save_path = app_data_dir.join(piper.folder_path);
+
+            match std::env::consts::OS {
+                "windows" => {
+                    let file_name = PathBuf::from(format!("{}.zip", piper.file_name));
+
+                    download_file(&piper.download_url_windows, &save_path.join(file_name)).await.map_err(|e| e)?;
+                },
+                "linux" => {
+                    let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
+
+                    download_file(&piper.download_url_linux, &save_path.join(file_name)).await.map_err(|e| e)?;
+                },
+                "macos" => {
+                    let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
+
+                    download_file(&piper.download_url_macos, &save_path.join(file_name)).await.map_err(|e| e)?;
+                },
+                _ => {
+                    return Err("Unsupported OS".to_string());
+                }
+            }
         },
         ModelSelection::Voiceover(voiceover) => {
             let save_path = app_data_dir.join(voiceover.folder_path);
