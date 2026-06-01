@@ -1,6 +1,8 @@
 use tokio::io::AsyncWriteExt;
 use serde::Deserialize;
+use core::arch;
 use std::path::PathBuf;
+use zip::ZipArchive;
 use tauri::Manager;
 
 
@@ -113,17 +115,26 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "windows" => {
                     let file_name = PathBuf::from(format!("{}.zip", piper.file_name));
 
-                    download_file(&piper.download_url_windows, &save_path.join(file_name)).await.map_err(|e| e)?;
+                    download_file(&piper.download_url_windows, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
+
+                    tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
                 },
                 "linux" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&piper.download_url_linux, &save_path.join(file_name)).await.map_err(|e| e)?;
+                    download_file(&piper.download_url_linux, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
+
+                    tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
                 },
                 "macos" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&piper.download_url_macos, &save_path.join(file_name)).await.map_err(|e| e)?;
+                    download_file(&piper.download_url_macos, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
+
+                    tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
                 },
                 _ => {
                     return Err("Unsupported OS".to_string());
@@ -160,6 +171,25 @@ async fn download_file(url: &str, save_path: &PathBuf) -> Result<(), String> {
     }
 
     tokio::fs::rename(&tmp_path, save_path).await.map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+
+async fn extract_archive(archieve_path: &PathBuf, target_dir: &PathBuf) -> Result<(), String> {
+    match std::env::consts::OS {
+        "windows" => {
+            let archieve_file = std::fs::File::open(archieve_path).map_err(|e| e.to_string())?;
+            let mut archieve = ZipArchive::new(archieve_file).map_err(|e| e.to_string())?;
+            archieve.extract(target_dir).map_err(|e| e.to_string())?;
+        },
+        _ => {
+            let tar_gz = std::fs::File::open(archieve_path).map_err(|e| e.to_string())?;
+            let tar = flate2::read::GzDecoder::new(tar_gz);
+            let mut archieve = tar::Archive::new(tar);
+            archieve.unpack(target_dir).map_err(|e| e.to_string())?;
+        },
+    }
 
     Ok(())
 }
