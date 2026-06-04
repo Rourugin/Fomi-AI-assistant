@@ -2,6 +2,7 @@ import * as api from './api.js';
 
 
 const { getCurrentWindow } = window.__TAURI__.window;
+const listen = window.__TAURI__.event?.listen;
 
 
 async function checkSystem() {
@@ -12,11 +13,11 @@ async function checkSystem() {
         document.getElementById('free-space').innerText = `${sysInfo.free_space_gb.toFixed(2)} GB`;
         document.getElementById('total-ram').innerText = `${sysInfo.total_ram_gb.toFixed(2)} GB`;
 
-        updateStatus('m-main', deps.has_main_model);
-        updateStatus('m-embed', deps.has_embedder_model);
+        updateStatus('m-llm', deps.has_main_model);
+        updateStatus('m-embedder', deps.has_embedder_model);
         updateStatus('m-whisper', deps.has_whisper);
         updateStatus('m-piper', deps.has_piper);
-        updateStatus('m-voice', deps.has_voiceover && deps.has_voiceover_json);
+        updateStatus('m-voiceover', deps.has_voiceover && deps.has_voiceover_json);
 
     } catch (err) {
         console.error("Calling Tauri command error:", err);
@@ -111,4 +112,23 @@ document.getElementById('voiceover-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('voiceover-selector').value;
 
     await api.startDownload("voiceover", model_id);
+});
+
+
+listen('download_progress', (event) => {
+    let component_id = event.payload.id;
+
+    let progress_bar = document.getElementById(`${component_id}-progress`);
+    let selector = document.getElementById(`${component_id}-selector`);
+    let btn = document.getElementById(`${component_id}-btn`);
+    let badge = document.getElementById(`m-${component_id}`);
+
+    let downloaded_procent = Math.floor((event.payload.downloaded / event.payload.total) * 100);
+
+    progress_bar.value = downloaded_procent;
+    progress_bar.classList.remove('hidden');
+    selector.classList.add('hidden');
+    btn.classList.add('hidden');
+
+    badge.innerText = `Downloaded: ${downloaded_procent}`;
 });

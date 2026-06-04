@@ -33,16 +33,18 @@
                     <option value="Llama-3-8B" class="option">Llama-3-8B-Instruct</option>
                     <option value="Mistral-7B" class="option">Mistral-7B-Instruct-v0.3 (Q5_K_M)</option>
                 </select>
+                <progress id="llm-progress" class="hidden" value="0" max="100"></progress>
                 <button class="btn-install" id="llm-btn">Download</button>
-                <span class="status-badge" id="m-main">Checking...</span>
+                <span class="status-badge" id="m-llm">Checking...</span>
             </div>
             <div class="dep-item">
                 <span>Embedder Model (embedder_model.gguf)</span>
                 <select name="embedder" id="embedder-selector" class="selector">
                     <option value="minilm" class="option">all-minilm-l6-v2</option>
                 </select>
+                <progress id="embedder-progress" class="hidden" value="0" max="100"></progress>
                 <button class="btn-install" id="embedder-btn">Download</button>
-                <span class="status-badge" id="m-embed">Checking...</span>
+                <span class="status-badge" id="m-embedder">Checking...</span>
             </div>
             <div class="dep-item">
                 <span>Whisper Engine (Whisper)</span> 
@@ -51,6 +53,7 @@
                     <option value="ggml-base" class="option">ggml-base.en.bin</option>
                     <option value="ggml-small" class="option">ggml-small.en.bin</option>
                 </select>
+                <progress id="whisper-progress" class="hidden" value="0" max="100"></progress>
                 <button class="btn-install" id="whisper-btn">Download</button>
                 <span class="status-badge" id="m-whisper">Checkin...</span>
             </div>
@@ -59,6 +62,7 @@
                 <select name="piper" id="piper-selector" class="selector">
                     <option value="piper" class="option">Piper</option>
                 </select>
+                <progress id="piper-progress" class="hidden" value="0" max="100"></progress>
                 <button class="btn-install" id="piper-btn">Download</button>
                 <span class="status-badge" id="m-piper">Checking...</span>
             </div>
@@ -69,8 +73,9 @@
                     <option value="US-libritts" class="option">en_US-libritts-high</option>
                     <option value="GB-semaine" class="option">en_GB-semaine-medium</option>
                 </select>
+                <progress id="voiceover-progress" class="hidden" value="0" max="100"></progress>
                 <button class="btn-install" id="voiceover-btn">Download</button>
-                <span class="status-badge" id="m-voice">Checking...</span>
+                <span class="status-badge" id="m-voiceover">Checking...</span>
             </div>
         </div>
     </div>

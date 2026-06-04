@@ -1,9 +1,8 @@
+use serde::{Deserialize, Serialize};
 use tokio::io::AsyncWriteExt;
-use serde::Deserialize;
-use core::arch;
 use std::path::PathBuf;
 use zip::ZipArchive;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 
 #[derive(Deserialize)]
@@ -51,6 +50,23 @@ struct VoiceoverModel {
     folder_path: String
 }
 
+#[derive(Serialize, Clone)]
+struct ProgressPayload {
+    id: String,
+    downloaded: u64,
+    total: u64,
+}
+
+impl ProgressPayload {
+    fn new(id: String, downloaded: u64, total: u64) -> Result<ProgressPayload, Box<dyn std::error::Error>> {
+        Ok(ProgressPayload{
+            id,
+            downloaded,
+            total,
+        })
+    }
+}
+
 
 #[tauri::command]
 pub async fn start_download(app: tauri::AppHandle, component_type: String, model_id: String) -> Result<(), String> {
@@ -70,7 +86,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             let found_model = registry.main_models.iter().find(|m| m.value == model_id);
 
             match found_model {
-                Some(model) => (ModelSelection::Standard(model.clone())),
+                Some(model) => ModelSelection::Standard(model.clone()),
                 None => return Err("Model not found in registry".to_string()),
             }
         },
@@ -81,7 +97,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             let found_whisper = registry.whisper.iter().find(|w| w.value == model_id);
 
             match found_whisper {
-                Some(whisper) => (ModelSelection::Standard(whisper.clone())),
+                Some(whisper) => ModelSelection::Standard(whisper.clone()),
                 None => return Err("Whisper not found in registry".to_string()),
             }
         },
@@ -92,7 +108,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             let found_voiceover = registry.voiceover.iter().find(|v| v.value == model_id);
 
             match found_voiceover {
-                Some(voiceover) => (ModelSelection::Voiceover(voiceover.clone())),
+                Some(voiceover) => ModelSelection::Voiceover(voiceover.clone()),
                 None => return Err("Voiveover not found in registry".to_string()),
             }
         },
@@ -104,9 +120,9 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
     match selected_model {
         ModelSelection::Standard(model) => {
-            let save_path = app_data_dir.join(model.folder_path).join(model.file_name);
+            let save_path = app_data_dir.join(model.folder_path).join(model.file_name.clone());
 
-            download_file(&model.download_url, &save_path).await.map_err(|e| e)?;
+            download_file(&app, &model.download_url, &save_path, &component_type).await.map_err(|e| e)?;
         },
         ModelSelection::Piper(piper) => {
             let save_path = app_data_dir.join(piper.folder_path);
@@ -115,7 +131,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "windows" => {
                     let file_name = PathBuf::from(format!("{}.zip", piper.file_name));
 
-                    download_file(&piper.download_url_windows, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    download_file(&app, &piper.download_url_windows, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
                     extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
 
                     tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
@@ -123,7 +139,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "linux" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&piper.download_url_linux, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    download_file(&app, &piper.download_url_linux, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
                     extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
 
                     tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
@@ -131,7 +147,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "macos" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&piper.download_url_macos, &save_path.join(file_name.clone())).await.map_err(|e| e)?;
+                    download_file(&app, &piper.download_url_macos, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
                     extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
 
                     tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
@@ -146,8 +162,8 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
             let save_path_onnx = save_path.join(voiceover.file_name_onnx);
             let save_path_json = save_path.join(voiceover.file_name_json);
 
-            download_file(&voiceover.download_url_onnx, &save_path_onnx).await.map_err(|e| e)?;
-            download_file(&voiceover.download_url_json, &save_path_json).await.map_err(|e| e)?;
+            download_file(&app, &voiceover.download_url_onnx, &save_path_onnx, &component_type).await.map_err(|e| e)?;
+            download_file(&app, &voiceover.download_url_json, &save_path_json, &component_type).await.map_err(|e| e)?;
         },
     }
 
@@ -155,7 +171,7 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
 }
 
 
-async fn download_file(url: &str, save_path: &PathBuf) -> Result<(), String> {
+async fn download_file(app: &tauri::AppHandle, url: &str, save_path: &PathBuf, component_id: &str) -> Result<(), String> {
     let save_folder = save_path.parent().expect("Couldn't reach the parent directory of save path");
 
     tokio::fs::create_dir_all(&save_folder).await.map_err(|e| e.to_string())?;
@@ -166,8 +182,16 @@ async fn download_file(url: &str, save_path: &PathBuf) -> Result<(), String> {
     let mut response = reqwest::get(url).await.map_err(|e| e.to_string())?;
     let mut file = tokio::fs::File::create(&tmp_path).await.map_err(|e| e.to_string())?;
 
+    let length = response.content_length().unwrap_or(0);
+    let mut downloaded_bytes = 0;
+
     while let Some(chunk) = response.chunk().await.map_err(|e| e.to_string())? {
+        downloaded_bytes += chunk.len() as u64;
         file.write_all(&chunk).await.map_err(|e| e.to_string())?;
+        app.emit(
+            "download_progress", 
+            ProgressPayload::new(component_id.to_string(), downloaded_bytes, length).map_err(|e| e.to_string())?
+        ).map_err(|e| e.to_string())?;
     }
 
     tokio::fs::rename(&tmp_path, save_path).await.map_err(|e| e.to_string())?;
