@@ -67,9 +67,6 @@
     "resources": [
       "assets/**/*",
       "dlls/**/*"
-    ],
-    "externalBin": [
-      "binaries/whisper-cli"
     ]
   }
 }

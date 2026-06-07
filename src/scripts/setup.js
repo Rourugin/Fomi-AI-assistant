@@ -64,7 +64,7 @@ async function checkDownloadable() {
     }
 }
 
-async function InitWindow() {
+async function initWindow() {
     const appWindow = getCurrentWindow();
 
     const unlisten = await appWindow.onCloseRequested(async (event) => {
@@ -77,41 +77,50 @@ async function InitWindow() {
     });
 }
 
+async function download(component_type, model_id) {
+    try {
+        await api.startDownload(component_type, model_id);
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
+
 
 window.addEventListener('DOMContentLoaded', async () => {
     await checkSystem();
     await checkDownloadable();
-    InitWindow();
+    initWindow();
 });
 
 document.getElementById('llm-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('llm-selector').value;
 
-    await api.startDownload("llm", model_id);
+    await download("llm", model_id);
 });
 
 document.getElementById('embedder-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('embedder-selector').value;
 
-    await api.startDownload("embedder", model_id);
+    await download("embedder", model_id);
 });
 
 document.getElementById('whisper-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('whisper-selector').value;
 
-    await api.startDownload("whisper", model_id);
+    await download("whisper", model_id);
 });
 
 document.getElementById('piper-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('piper-selector').value;
 
-    await api.startDownload("piper", model_id);
+    await download("piper", model_id);
 });
 
 document.getElementById('voiceover-btn').addEventListener('click', async () => {
     const model_id = document.getElementById('voiceover-selector').value;
 
-    await api.startDownload("voiceover", model_id);
+    await download("voiceover", model_id);
 });
 
 

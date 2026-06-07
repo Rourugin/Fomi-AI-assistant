@@ -47,7 +47,7 @@ impl SystemDependencies {
         let piper_path = model_dir
             .join("voice")
             .join("tts")
-            .join("piper-engine");
+            .join("piper");
 
         match std::env::consts::OS {
             "windows" => {
