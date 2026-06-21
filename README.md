@@ -80,28 +80,7 @@ Our implementation of RAG (Retrieval-Augmented Generation) follows a specific lo
 
 ## 🛠️ Getting Started
 
-### Prerequisites
-* **Rust**: Stable toolchain.
-* **C++ Build Tools**: `cmake`, `clang` (required for AI engine compilation).
-* **Node.js**: For frontend bundling.
-* **Local Llama-cpp-2**: The project uses a locally patched version of the `llama-cpp-2` crate (located in `./llama-cpp-2-local`) to fix memory allocation issues (mmap) on Windows. Cargo will automatically resolve this via the `[patch]` section in `Cargo.toml`.
-
-### Installation
-
-1.  **Clone the repo**
-    ```bash
-    git clone [https://github.com/Rourugin/Fomi-AI-assistant.git](https://github.com/Rourugin/Fomi-AI-assistant.git)
-    ```
-2.  **Download the Brain & Senses**
-    * **LLM:** Get `dolphin-2.2.1-mistral-7b.gguf` (or your preferred GGUF model) and place it in `./models/model.gguf`.
-    * **Embedder:** The system uses `all-MiniLM-L6-v2` for FastEmbed vector memory. Ensure it is placed in `./models/embedder_model.gguf`.
-    * **STT (Hearing):** Download a Whisper model (e.g., `ggml-base.bin`) and place it in `./models/voice/stt/whisper.bin`.
-    * **TTS (Speech):** Download a Piper ONNX model (e.g., `en_US-amy-medium.onnx` + its `.json` config) and place it in `./models/voice/tts/`.
-    * **Important**: Ensure that all Piper-related DLLs (if on Windows) are placed in the same folder as the piper executable.
-3.  **Run Development Build**
-    ```bash
-    cargo tauri dev
-    ```
+For detailed, step-by-step instructions on how to install dependencies and compile Fomi for **Windows, Linux, and macOS**, please refer to our [Installation Guide](INSTALL.md).
 
 ---
 
