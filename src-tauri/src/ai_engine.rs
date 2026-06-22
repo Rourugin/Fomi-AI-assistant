@@ -126,6 +126,13 @@ impl AiSession {
             Ok(response_text)
         })
     }
+
+    pub fn clear_cache(& mut self) {
+        self.with_mut(|fields| {
+            fields.context.clear_kv_cache();
+            fields.history.clear();
+        });
+    }
 }
 
 unsafe impl Send for AiSession {}

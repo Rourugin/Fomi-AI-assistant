@@ -42,6 +42,16 @@ impl SessionManager {
         Ok(())
     }
 
+    fn get_session(&self) -> Result<AiSession, String> {
+        let session_opt = self.session
+            .lock()
+            .map_err(|_| "Mutex is poisoned".to_string())?
+            .take();
+
+        let session = session_opt.ok_or_else(|| "No active session".to_string())?;
+        Ok(session)
+    }
+
     pub async fn think(&self, text: &str) -> Result<String, Box<dyn std::error::Error>> {
         let system_prompt = self.current_system_prompt
             .lock()
@@ -71,24 +81,19 @@ impl SessionManager {
         let mut final_answer = String::new();
 
         while current_step < max_steps {
-            let session_opt = self.session
-                .lock()
-                .map_err(|_| "Mutex poisoned")?
-                .take();
-            let mut session = session_opt.ok_or_else(|| "No active session".to_string())?;
+            let mut session = self.get_session()?;
+            let answer_result = session.infer(&prompt_part);
 
-            let answer = session.infer(&prompt_part).map_err(|e| format!("{}", e))?;
+            *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
+
+            let answer = answer_result.map_err(|e| format!("{}", e))?;
             if let Some(request) = parse_tool_call(&answer) {
                 prompt_part = self.process_tool_call(request)?;
-
-                *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
                 current_step += 1;
 
                 continue;
             } else {
-                final_answer = answer;
-                *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
-
+                final_answer = answer.to_string();
                 break;
             }
         }
@@ -107,23 +112,17 @@ impl SessionManager {
     }
 
     fn restart_session_internal(&self, new_prompt: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
-        let new_current_prompt = {
+        if let Some(new_p) = new_prompt {
             let mut prompt_guard = self.current_system_prompt
                 .lock()
                 .map_err(|_| "Mutex poisoned")?;
-            
-            if let Some(new_p) = new_prompt {
-                *prompt_guard = new_p.to_string();
-            }
-            
-            prompt_guard.clone()
-        };
+            *prompt_guard = new_p.to_string();
+        }
 
-        let new_session = self.core.start_session(&new_current_prompt)?;
-        let mut session_guard = self.session
-            .lock()
-            .map_err(|_| "Mutex poisoned")?;
-        *session_guard = Some(new_session);
+        let mut session = self.get_session()?;
+        session.clear_cache();
+
+        *self.session.lock().map_err(|_| "Mutex poisoned")? = Some(session);
 
         Ok(())
     }
