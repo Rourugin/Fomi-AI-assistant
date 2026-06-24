@@ -64,7 +64,7 @@ pub async fn set_personality(state: tauri::State<'_, session_manager::SessionMan
         state.reset(wipe).await.map_err(|e| e.to_string())?;
     }
 
-    let app_config_dir = app.path().app_config_dir().unwrap();
+    let app_config_dir = app.path().app_data_dir().unwrap();
     settings::AppSettings::save_personality_choice(app_config_dir, filename)
         .map_err(|e| format!("Failed to save personality choice: {}", e))?;
 
@@ -73,7 +73,7 @@ pub async fn set_personality(state: tauri::State<'_, session_manager::SessionMan
 
 #[tauri::command]
 pub async fn get_active_personality(app: tauri::AppHandle) -> Result<String, String> {
-    let config_dir = app.path().app_config_dir().unwrap();
+    let config_dir = app.path().app_data_dir().unwrap();
     let settings = settings::AppSettings::load_settings(config_dir);
 
     let filename = settings.active_personality;
