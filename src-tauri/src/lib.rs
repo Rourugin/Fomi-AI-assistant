@@ -63,7 +63,7 @@ pub fn run() {
                     .clone()
                     .parent()
                     .expect("Failed to get parent directory")
-                    .join("piper-engine");
+                    .join("piper");
 
                 match std::env::consts::OS {
                     "windows" => {

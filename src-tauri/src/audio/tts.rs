@@ -16,7 +16,17 @@ impl TtsEngine {
     }
 
     pub async fn generate_audio(&self, text: String) -> Result<Vec<u8>, Box<dyn Error>> {
+        if !self.exe_path.exists() {
+            return Err(format!("Piper doesn't exist: {:?}", self.exe_path).into());
+        }
+
+        if !self.model_path.exists() {
+            return Err(format!("TTS model wasn't found by path: {:?}", self.model_path).into());
+        }
+
         let wav_path = env::temp_dir().join("fomi_output.wav");
+
+        tokio::fs::remove_file(&wav_path).await.ok();
 
         let mut command = Command::new(self.exe_path.as_os_str());
         command.args([
@@ -24,15 +34,26 @@ impl TtsEngine {
             "--output_file", wav_path.to_str().ok_or("Converting temp path to str error")?
         ]);
         command.stdin(Stdio::piped());
+        command.stderr(Stdio::piped());
 
-        let mut child = command.spawn()?;
-        let mut stdin = child.stdin.take().expect("Failed to open stdin");
-        stdin.write_all(text.as_bytes())?;
-        drop(stdin);
-        child.wait()?;
+        let mut child = command.spawn().map_err(|e| format!("Failed to run Piper. Error: {}", e))?;
+        if let Some(mut stdin) = child.stdin.take() {
+            stdin.write_all(text.as_bytes())?;
+        }
+
+        let output = child.wait_with_output()?;
+        if !output.status.success() {
+            let err_msg = String::from_utf8_lossy(&output.stderr);
+            return Err(format!("Piper exited with error: {}", err_msg).into());
+        }
+
+        if !wav_path.exists() {
+            return Err(format!("Piper successed, but file {:?} didn't appear", wav_path).into());
+        }
 
         let audio_data = tokio::fs::read(wav_path.clone()).await?;
         tokio::fs::remove_file(&wav_path).await.ok();
+
         Ok(audio_data)
     }
 }
