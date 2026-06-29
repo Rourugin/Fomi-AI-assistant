@@ -34,8 +34,11 @@ struct StandardModel {
 struct PiperModel {
     value: String,
     download_url_windows: String,
-    download_url_linux: String,
-    download_url_macos: String,
+    download_url_linux_x86_64: String,
+    download_url_linux_armv7l: String,
+    download_url_linux_aarch64: String,
+    download_url_macos_aarch64: String,
+    download_url_macos_x64: String,
     file_name: String,
     folder_path: String,
 }
@@ -139,7 +142,21 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "linux" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&app, &piper.download_url_linux, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                    match std::env::consts::ARCH {
+                        "x86_64" => {
+                            download_file(&app, &piper.download_url_linux_x86_64, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                        },
+                        "arm" => {
+                            download_file(&app, &piper.download_url_linux_armv7l, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                        },
+                        "aarch64" => {
+                            download_file(&app, &piper.download_url_linux_aarch64, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                        },
+                        _ => {
+                            return Err("Unsupported Arch on linux".to_string());
+                        }
+                    }
+
                     extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
 
                     tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
@@ -147,7 +164,18 @@ pub async fn start_download(app: tauri::AppHandle, component_type: String, model
                 "macos" => {
                     let file_name = PathBuf::from(format!("{}.tar.gz", piper.file_name));
 
-                    download_file(&app, &piper.download_url_macos, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                    match std::env::consts::ARCH {
+                        "aarch64" => {
+                            download_file(&app, &piper.download_url_macos_aarch64, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                        },
+                        "x86_64" => {
+                            download_file(&app, &piper.download_url_macos_x64, &save_path.join(file_name.clone()), &component_type).await.map_err(|e| e)?;
+                        },
+                        _ => {
+                            return Err("Unsupported ARCH on macos".to_string());
+                        }
+                    }
+
                     extract_archive(&save_path.join(file_name.clone()), &save_path).await.map_err(|e| e)?;
 
                     tokio::fs::remove_file(save_path.join(file_name)).await.map_err(|e| e.to_string())?;
