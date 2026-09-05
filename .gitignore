@@ -31,3 +31,4 @@ models/**/*.onnx
 models/**/*.json
 !models/**/.gitkeep
 promotion_strategy.md
+tree.txt

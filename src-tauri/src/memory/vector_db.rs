@@ -148,7 +148,9 @@ impl FomiVectorStore {
                 let distance = distances.value(i);
 
                 if let Ok(uuid) = Uuid::parse_str(id_str) {
-                    found_memories.push((uuid, text_str.to_string(), distance));
+                    if distance < 0.7 {
+                        found_memories.push((uuid, text_str.to_string(), distance));
+                    }
                 }
             }
         }
